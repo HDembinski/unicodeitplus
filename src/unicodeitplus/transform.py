@@ -107,9 +107,6 @@ class Transformer(TransformerBase):  # type:ignore
 
 
 def _convert_math(items: List[Any]) -> str:
-    r: List[List[str]] = []
-    stack: List[str] = []
-
     def visitor(
         r: List[List[str]],
         stack: List[str],
@@ -133,8 +130,8 @@ def _convert_math(items: List[Any]) -> str:
                     assert False  # should never happen
                 stack[:] = initial_stack
 
-    visitor(r, stack, items)
-
+    r: List[List[str]] = []
+    visitor(r, [], items)
     return "".join(_handle_cmds(x) for x in r)
 
 
