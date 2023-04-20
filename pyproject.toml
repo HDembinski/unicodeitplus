@@ -59,7 +59,6 @@ testpaths = ["tests"]
 xfail_strict = true
 filterwarnings = [
     "error::DeprecationWarning",
-    "error::numpy.VisibleDeprecationWarning",
 ]
 
 [tool.coverage.run]
