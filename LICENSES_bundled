@@ -1,0 +1,6 @@
+The unicodeitplus repository and source distributions bundles a file which is compatibly licensed.
+
+Name: Unicode characters and corresponding LaTeX math mode commands
+Files: extern/unimathsymbols.txt
+License: LaTeX Project Public License 1.3
+  For details, see extern/LICENCE.LPPL.

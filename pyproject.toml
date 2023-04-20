@@ -1,0 +1,71 @@
+[build-system]
+requires = [
+    "setuptools>=46.4",
+    "setuptools_scm[toml]>=3.4",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unicodeitplus"
+description = "Converts simple LaTeX to an unicode approximation"
+dependencies = ["lark"]
+maintainers = [
+    { name = "Hans Dembinski" },
+    { email = "hans.dembinski@gmail.com" }
+]
+readme = "README.rst"
+requires-python = ">=3.8"
+license = {text = "BSD 3-Clause License"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Developers"
+]
+dynamic = ["version"]
+
+[project.urls]
+repository = "https://github.com/HDembinski/unicodeitplus"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[project.scripts]
+unicodeitplus = "unicodeitplus.cli:main"
+
+[tool.setuptools_scm]
+
+[tool.ruff]
+max-length = 90
+extend-exclude = ["test_*.py"]
+
+[tool.mypy]
+strict = true
+no_implicit_optional = false
+allow_redefinition = true
+ignore_missing_imports = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-q -ra --ff"
+testpaths = ["tests"]
+xfail_strict = true
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::numpy.VisibleDeprecationWarning",
+]
+
+[tool.coverage.run]
+relative_files = true
+source = ["unicodeitplus"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover"]
+
+[tool.pydocstyle]
+convention = "numpy"
