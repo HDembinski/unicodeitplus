@@ -2,10 +2,10 @@ from unicodeitplus import replace
 from tabulate import tabulate
 
 LATEX = r"""
-\alpha \beta \gamma \Gamma
-e^+ \mu^-
+\alpha \beta \gamma \Gamma \Im \Re \hbar
+e^+ \mu^- \slash{\partial}
 \exists \in \int \sum \partial \infty
-\slash{\partial}
+\perp \parallel \therefore \because \subset \supset
 \to \longrightarrow
 p\bar{p} \mathrm{t}\bar{\mathrm{t}}
 \mathcal{H} \mathbb{R}
@@ -13,10 +13,6 @@ p\bar{p} \mathrm{t}\bar{\mathrm{t}}
 \underline{x} \dot{x} \ddot{x} \vec{x}
 A^6 m_0
 1.2 \times 10^{23}
-\Im \Re
-\hbar
-\perp \parallel
-\therefore \because \subset \supset
 $p_T / \mathrm{GeV} c^{-1}$
 K^0_S
 $D^{\ast\ast} \to hhee$

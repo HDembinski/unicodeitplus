@@ -17,7 +17,7 @@ LaTeX to Unicode: How does this even work?
 ------------------------------------------
 Unicode contains many subscript and superscript characters. It also contains font variations of characters of both latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
 
-Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
+Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt`` from Günter Milde, which provides the mapping between LaTeX macros and Unicode symbols.
 
 Caveats
 -------
@@ -29,26 +29,22 @@ Caveats
 Examples
 --------
 
-==========================================  ===============
-LaTeX                                       Unicode
-==========================================  ===============
-``\alpha \beta \gamma \Gamma``              ``𝛼 𝛽 𝛾 𝛤``
-``e^+ \mu^-``                               ``𝑒⁺ 𝜇⁻``
-``\exists \in \int \sum \partial \infty``   ``∃ ∈ ∫ ∑ ∂ ∞``
-``\slash{\partial}``                        ``∂̸``
-``\to \longrightarrow``                     ``→ ⟶``
-``p\bar{p} \mathrm{t}\bar{\mathrm{t}}``     ``𝑝𝑝̄ tt̄``
-``\mathcal{H} \mathbb{R}``                  ``ℋ ℝ``
-``\phone \checkmark``                       ``☎ ✓``
-``\underline{x} \dot{x} \ddot{x} \vec{x}``  ``𝑥̲ 𝑥̇ 𝑥̈ 𝑥⃗``
-``A^6 m_0``                                 ``𝐴⁶ 𝑚₀``
-``1.2 \times 10^{23}``                      ``1.2 × 10²³``
-``\Im \Re``                                 ``ℑ ℜ``
-``\hbar``                                   ``ℏ``
-``\perp \parallel``                         ``⟂ ∥``
-``\therefore \because \subset \supset``     ``∴ ∵ ⊂ ⊃``
-``p_T / \mathrm{GeV} c^{-1}``               ``𝑝ₜ/GeV𝑐⁻¹``
-``K^0_S``                                   ``𝐾⁰ₛ``
-``D^{\ast\ast} \to hhee``                   ``𝐷**→ℎℎ𝑒𝑒``
-``A \cdot \mathbf{x} \simeq \mathbf{b}``    ``𝐴⋅𝐱≃𝐛``
-==========================================  ===============
+=======================================================  =================
+LaTeX                                                    Unicode
+=======================================================  =================
+``\alpha \beta \gamma \Gamma \Im \Re \hbar``             ``𝛼 𝛽 𝛾 𝛤 ℑ ℜ ℏ``
+``e^+ \mu^- \slash{\partial}``                           ``𝑒⁺ 𝜇⁻ ∂̸``
+``\exists \in \int \sum \partial \infty``                ``∃ ∈ ∫ ∑ ∂ ∞``
+``\perp \parallel \therefore \because \subset \supset``  ``⟂ ∥ ∴ ∵ ⊂ ⊃``
+``\to \longrightarrow``                                  ``→ ⟶``
+``p\bar{p} \mathrm{t}\bar{\mathrm{t}}``                  ``𝑝𝑝̄ tt̄``
+``\mathcal{H} \mathbb{R}``                               ``ℋ ℝ``
+``\phone \checkmark``                                    ``☎ ✓``
+``\underline{x} \dot{x} \ddot{x} \vec{x}``               ``𝑥̲ 𝑥̇ 𝑥̈ 𝑥⃗``
+``A^6 m_0``                                              ``𝐴⁶ 𝑚₀``
+``1.2 \times 10^{23}``                                   ``1.2 × 10²³``
+``p_T / \mathrm{GeV} c^{-1}``                            ``𝑝ₜ/GeV𝑐⁻¹``
+``K^0_S``                                                ``𝐾⁰ₛ``
+``D^{\ast\ast} \to hhee``                                ``𝐷**→ℎℎ𝑒𝑒``
+``A \cdot \mathbf{x} \simeq \mathbf{b}``                 ``𝐴⋅𝐱≃𝐛``
+=======================================================  =================
