@@ -7,15 +7,13 @@ except Exception:
     pass
 
 from .parser import parser
-from .transform import transform
 
 __all__ = ["replace", "parse"]
 
 
 def parse(s: str) -> str:
     """Parse simple LaTeX code and replace it by an unicode approximation."""
-    tree = parser.parse(s)
-    return transform(tree)
+    return parser.parse(s)  # type:ignore
 
 
 def replace(s: str) -> str:

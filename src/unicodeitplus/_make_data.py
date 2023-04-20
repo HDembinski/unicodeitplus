@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple, Set
 
 
 def _generate_sub_and_super_scripts() -> Dict[str, str]:
@@ -70,7 +70,7 @@ def _generate_sub_and_super_scripts() -> Dict[str, str]:
     return cmds
 
 
-def _generate_from_unimathsymbols_txt() -> Dict[str, str]:
+def _generate_from_unimathsymbols_txt() -> Tuple[Dict[str, str], Set[str]]:
     d = Path(__file__).parent
     fn = None
     while d.parent is not None:
@@ -82,58 +82,69 @@ def _generate_from_unimathsymbols_txt() -> Dict[str, str]:
 
     # Symbols extracted from extern/unimathsymbols.txt, which is under Copyright 2011 by
     # Günter Milde and licensed under the LaTeX Project Public License (LPPL)
-    def match(comments: str) -> str:
+    def match(comments: bytes) -> str:
         matches = [
-            ("PLUS", "+"),
-            ("MINUS", "-"),
-            ("EQUALS", "="),
-            ("LEFT PARENTHESIS", "("),
-            ("RIGHT PARENTHESIS", ")"),
+            (b"PLUS", "+"),
+            (b"MINUS", "-"),
+            (b"EQUALS", "="),
+            (b"LEFT PARENTHESIS", "("),
+            (b"RIGHT PARENTHESIS", ")"),
         ]
         for match, latex in matches:
             if match in comments:
                 return latex
-        assert False, f"unmatched: {comments}"  # nosec, never arrive here
+        assert False, f"unmatched: {comments!r}"  # nosec, never arrive here
 
     cmds = {}
-    with open(fn) as f:
+    has_arg = set()
+    with open(fn, "rb") as f:
         for line in f:
-            if line.startswith("#"):
+            if line.startswith(b"#"):
                 continue
-            items = line.split("^")
-            _, ch, latex, latex2, clas, category, requirements, comments = items
+            items = line.split(b"^")
+            _, ch, latex, latex2, cls, category, _, comments = items
+            ch = ch.decode()
+            latex = latex.decode()
+            latex2 = latex2.decode()
             comments = comments[:-1]
+            arg = _has_arg(cls, category)
+            if arg:
+                ch = ch[-1]
             if latex:
-                if len(ch) > 1:
-                    cmds[latex] = ch[1]
-                else:
-                    cmds[latex] = ch
+                if latex == ch:
+                    continue
+                cmds[latex] = ch
+                if arg:
+                    has_arg.add(latex)
             elif latex2:
                 cmds[latex2] = ch
-            elif comments.startswith("SUPERSCRIPT"):
+            elif comments.startswith(b"SUPERSCRIPT"):
                 latex = f"^{{{match(comments)}}}"
                 cmds[latex] = ch
-            elif comments.startswith("SUBSCRIPT"):
+            elif comments.startswith(b"SUBSCRIPT"):
                 latex = f"_{{{match(comments)}}}"
                 cmds[latex] = ch
             else:
                 pass
 
-    return cmds
+    return cmds, has_arg
 
 
-def _corrections_and_enhancements() -> Dict[str, str]:
-    cmds = {}
+def generate_data() -> str:
+    """Generate source code for Python module with database of known LaTeX commands."""
+    cmds = _generate_sub_and_super_scripts()
+    cmds2, has_arg = _generate_from_unimathsymbols_txt()
+    cmds.update(cmds2)
+
+    # corrections and enhancements
     cmds[r"^{\ast}"] = "*"
     cmds["h"] = "ℎ"
     cmds[r"\partial"] = "∂"
     cmds[r"\slash"] = "\u0338"
     cmds[r"\phone"] = "☎"
     cmds[r"\thinspace"] = "\u2009"
-    return cmds
 
-
-def _aliases(cmds: Dict[str, str]) -> None:
+    # aliases
     alias = {
         r"\rightarrow": r"\to",
         r"\hslash": r"\hbar",
@@ -142,13 +153,25 @@ def _aliases(cmds: Dict[str, str]) -> None:
     for old, new in alias.items():
         cmds[new] = cmds[old]
 
+    # fill up has_arg
+    for key in cmds:
+        i = key.find("{")
+        if i > 0:
+            has_arg.add(key[:i])
 
-def generate_data() -> str:
-    """Generate source code for Python module with database of known LaTeX commands."""
-    cmds = _generate_sub_and_super_scripts()
-    cmds.update(_generate_from_unimathsymbols_txt())
-    cmds.update(_corrections_and_enhancements())
-    _aliases(cmds)
+    has_arg |= {
+        r"\big",
+        r"\Big",
+        r"\Bigg",
+        r"\left",
+        r"\right",
+        r"\text",
+        r"\sqrt",
+        r"\slash",
+        r"\mathrm",
+    }
+
+    has_arg.remove("\\")
 
     chunks = [
         """\"\"\"
@@ -168,7 +191,22 @@ COMMANDS = {
         chunks.append(f"    {key!r}: {val!r},\n".replace("'", '"'))
     chunks.append("}\n")
 
+    chunks.append(
+        """
+
+HAS_ARG = {
+"""
+    )
+
+    for key in sorted(has_arg):
+        chunks.append(f"    {key!r},\n".replace("'", '"'))
+    chunks.append("}\n")
+
     return "".join(chunks)
+
+
+def _has_arg(cls: bytes, category: bytes) -> bool:
+    return cls == b"D" or category == b"mathaccent"
 
 
 if __name__ == "__main__":

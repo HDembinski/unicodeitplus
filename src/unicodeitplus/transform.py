@@ -1,56 +1,20 @@
 """Tools to transform LaTeX tree into unicode."""
 from . import _make_data  # noqa, imported for side-effects
-from .data import COMMANDS
-from lark import Tree, Token
-from typing import Optional, List, Union
-from dataclasses import dataclass
+from .data import COMMANDS, HAS_ARG
+from lark import Transformer as TransformerBase, Token
+from typing import List, Any
 
-
-HAS_ARG = {
-    r"_",
-    r"^",
-    r"\grave",
-    r"\acute",
-    r"\hat",
-    r"\tilde",
-    r"\bar",
-    r"\overline",
-    r"\breve",
-    r"\dot",
-    r"\ddot",
-    r"\slash",
-    r"\mathcal",
-    r"\mathbf",
-    r"\mathbb",
-    r"\mathring",
-    r"\mathrm",
-    r"\check",
-    r"\utilde",
-    r"\underbar",
-    r"\underline",
-    r"\not",
-    r"\lvec",
-    r"\vec",
-    r"\LVec",
-    r"\vec",
-    r"\dddot",
-    r"\ddddot",
-    r"\overleftrightarrow",
-    r"\underleftarrow",
-    r"\underrightarrow",
-    r"\text",
-    r"\left",
-    r"\right",
-    r"\big",
-    r"\Big",
-    r"\Bigg",
-    r"\sqrt",
-}
 
 IGNORE_AS_FALLBACK = {
     r"\text",
-    r"\mathbf",
+    r"\mathbb",
     r"\mathrm",
+    r"\mathbf",
+    r"\mathsf",
+    r"\mathsfbf",
+    r"\mathsfbfit",
+    r"\mathsfit",
+    r"\mathtt",
     r"\left",
     r"\right",
     r"\big",
@@ -61,91 +25,140 @@ IGNORE_AS_FALLBACK = {
 ESCAPED = {
     r"\}": "}",
     r"\{": "{",
+    r"\_": "_",
+    r"\^": "^",
     "\\\\": "\\",
 }
 
 
-@dataclass
-class State:
-    """Current state of the transform function."""
+class Transformer(TransformerBase):  # type:ignore
+    """Convert Tree to Unicode."""
 
-    math: bool
-    group: bool
-    command: List[str]
+    def start(self, ch: List[Any]) -> str:
+        """
+        Return final unicode.
 
+        The start token is handled last, because the transformer
+        starts from the leafs. So when we arrive here, everything
+        else is already transformed into strings. We only need
+        to handle escaped characters correctly and recursively
+        unparse groups.
+        """
+        r: List[str] = []
 
-def transform(ch: Union[Token, Tree], state: Optional[State] = None) -> str:
-    """Transform Lark Tree into unicode string."""
-    if state is None:
-        state = State(False, False, [])
+        def visitor(r: List[str], ch: List[Any]) -> None:
+            for x in ch:
+                if isinstance(x, str):
+                    x = ESCAPED.get(x, x)
+                    r.append(x)
+                elif isinstance(x, list):
+                    r.append("{")
+                    visitor(r, x)
+                    r.append("}")
+                else:
+                    assert False  # this should never happen
 
-    if isinstance(ch, Tree):
-        r = []
-        if ch.data == "math":
-            state.math = True
-        if ch.data == "group":
-            state.group = True
-        for x in ch.children:
-            r.append(transform(x, state))
-        if ch.data == "math":
-            state.math = False
-        if ch.data == "group":
-            state.group = False
-            if state.command:
-                state.command.clear()
+        visitor(r, ch)
         return "".join(r)
 
-    if ch.type == "CHARACTER":
-        x = ESCAPED.get(ch.value, ch.value)
-        return _handle_cmd(state, x)
-    if ch.type == "WS":
-        return "" if state.math else " "
-    if ch.type == "COMMAND":
-        x = ch.value.strip()
-        if x in HAS_ARG:
-            if x == r"\sqrt":
-                state.command.append(r"\overline")
-                return COMMANDS[r"\sqrt"]
-            state.command.append(x)
-            return ""
-        return _handle_cmd(state, x)
-    # never arrive here
-    assert False, f"unknown token {ch}"  # nosec
+    def CHARACTER(self, ch: Token) -> str:
+        """
+        Handle character token.
+
+        This is either a single charactor or an escaped character sequence.
+        """
+        return ch.value  # type:ignore
+
+    WS = CHARACTER
+
+    def COMMAND(self, ch: Token) -> str:
+        """
+        Handle command token.
+
+        We need to strip the whitespace which may be there.
+        """
+        return ch.value.strip()  # type:ignore
+
+    def group(self, items: List[Any]) -> List[Any]:
+        """
+        Handle group token.
+
+        Nothing to do, we just the children as a list.
+        """
+        return items
+
+    def math(self, items: List[Any]) -> str:
+        """
+        Handle math token.
+
+        Here the actual magic happens. The challenge is to treat macros which accept an
+        argument correctly, while respecting the grouping. A command which accepts an
+        argument acts on the next character or group. Groups can be nested, so we need
+        to handle this with recursion.
+
+        First, a recursive visitor with a command stack converts nested macros and
+        groups into a list of flat lists of commands which end in a leaf (a charactor or
+        command that accepts no argument).
+
+        Then, we convert each list of commands with the function _handle_cmds into
+        unicode. See comments in that function for details.
+        """
+
+        def visitor(
+            r: List[List[str]],
+            stack: List[str],
+            items: List[Any],
+        ) -> None:
+            initial_stack = stack.copy()
+            for x in items:
+                if isinstance(x, str) and x in HAS_ARG:
+                    if x == r"\sqrt":
+                        r.append(stack.copy() + [r"\sqrt"])
+                        stack.append(r"\overline")
+                    else:
+                        stack.append(x)
+                else:
+                    if isinstance(x, list):
+                        visitor(r, stack, x)
+                    elif isinstance(x, str):
+                        if not x.isspace() or (stack and stack[-1] == r"\text"):
+                            r.append(stack.copy() + [x])
+                    else:
+                        assert False  # should never happen
+                    stack[:] = initial_stack
+
+        r: List[List[str]] = []
+        visitor(r, [], items)
+        return "".join(_handle_cmds(x[:-1], x[-1]) for x in r)
 
 
-def _handle_cmd(state: State, x: str) -> str:
-    # - x can be a character or a command, like \alpha
-    # - state.command contains stack with commands, may be empty
-    # - to transform ^{\alpha} or \text{x} correctly, we first try to
-    #   convert innermost command and x as a unit
-    # - they are treated independently only if previous step fails
-    cmd_stack = state.command.copy()
-    if state.math:
-        cmd = cmd_stack[-1] if cmd_stack else ""
-        latex = f"{cmd}{{{x}}}"
-        if cmd and latex in COMMANDS:
-            x = COMMANDS[latex]
-            cmd_stack.pop()
-        elif x.startswith(r"\\"):
-            x = COMMANDS.get(x, x)
-        elif cmd in (r"\text", r"\mathrm"):
-            cmd_stack.pop()
-        else:
-            x = COMMANDS.get(x, x)
-        for cmd in reversed(cmd_stack):
-            if cmd in COMMANDS:
-                # must be some unicode modifier, e.g. \dot, \vec
-                assert cmd in HAS_ARG  # nosec
-                x += COMMANDS[cmd]
+def _handle_cmds(cmds: List[str], x: str) -> str:
+    # - x can be character or command, like \alpha
+    # - cmds contains commands to apply, may be empty
+    # - to transform ^{\alpha} or \text{x} correctly,
+    #   we first try to convert innermost command and x
+    #   as unit; if this fails we treat commands sequentially
+    # - other commands in cmds must be modifiers like \dot or
+    #   \vec that are converted into diacritical characters
+    # - if we cannot convert, we return unconverted LaTeX
+    if cmds:
+        innermost = True
+        for cmd in reversed(cmds):
+            latex = f"{cmd}{{{x}}}"
+            if latex in COMMANDS:
+                x = COMMANDS[latex]
+            elif cmd in (r"\text", r"\mathrm"):
+                pass
             else:
-                latex = f"{cmd}{{{x}}}"
-                if latex in COMMANDS:
-                    x = COMMANDS[latex]
+                if innermost:
+                    x = COMMANDS.get(x, x)
+                if cmd in COMMANDS:
+                    # must be some unicode modifier, e.g. \dot, \vec
+                    assert cmd in HAS_ARG  # nosec
+                    x += COMMANDS[cmd]
                 elif cmd not in IGNORE_AS_FALLBACK:
                     x = latex
+            innermost = False
     else:
-        for cmd in reversed(state.command):
-            x = f"{cmd}{{{x}}}"
-    if state.command and not state.group:
-        state.command.pop()
+        x = COMMANDS.get(x, x)
     return x
