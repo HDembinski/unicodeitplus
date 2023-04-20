@@ -29,12 +29,11 @@ LaTeX                                Unicode
 ``\partial``                         ∂
 ``\to``                              →
 ``p\bar{p}``                         𝑝𝑝̄
-``\mathrm{t}\bar{\mathrm{t}}``       tt̄
+``\mathrm{t}\overline{\mathrm{t}}``  tt̅
 ``\mathcal{H}``                      ℋ
 ``\mathbb{R}``                       ℝ
 ``\slash{\partial}``                 ∂̸
 ``\underline{x}``                    𝑥̲
-``\sqrt{12}``                        √1̅2̅
 ``\phone``                           ☎
 ``\checkmark``                       ✓
 ``\dot{x}``                          𝑥̇
@@ -51,5 +50,5 @@ LaTeX                                Unicode
 ``\because``                         ∵
 ``\subset``                          ⊂
 ``\supset``                          ⊃
-``p_T / \mathrm{GeV}c^{-1}``         𝑝ₜ/GeV𝑐⁻¹
+``p_T / \mathrm{GeV} c^{-1}``        𝑝ₜ/GeV𝑐⁻¹
 ===================================  =========
