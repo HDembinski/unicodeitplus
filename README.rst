@@ -5,11 +5,21 @@ unicodeitplus
 .. image:: https://img.shields.io/pypi/v/unicodeitplus.svg
         :target: https://pypi.python.org/pypi/unicodeitplus
 
-Convert simple LaTeX into an unicode approximation.
+Convert simple LaTeX into an unicode approximation and paste it anywhere.
 
-This package provides a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. Like unicodeit, it is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
+This package provides a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. unicodeitplus uses a better parser (generated from EBNF with the fantastic `Lark library <https://github.com/lark-parser/lark>`_) than ``unicodeit``, which handles some code on which ``unicodeit`` fails, and allows one to parse a mix of text and math code, like ``$p_T$ / GeV $c^{-1}$``.
 
-unicodeitplus uses a better parser (generated from EBNF with the fantastic `Lark library <https://github.com/lark-parser/lark>`_), which fixes a few bugs in unicodeit and also allows one to parse a mix of text and math code, like ``$p_T$ / GeV $c^{-1}$``.
+LaTeX to Unicode: How does this even work?
+------------------------------------------
+Unicode contains many subscript and superscript characters. It also font variations of characters of both latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
+
+Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
+
+Caveats
+-------
+- Only a subset of all LaTeX code can be converted to Unicode. Some Unicode characters simply don't exist. For example, subscript characters exist only for a subset of all lowercase latin characters, and there are no subscript characters for uppercase latin characters.
+- Your font needs to contain glyphs for the Unicode characters, otherwise you will typically see a little box with the unicode character index.
+- The visually best results seem to be obtained with monospace fonts.
 
 Examples
 --------
