@@ -2,7 +2,7 @@
 from . import _make_data  # noqa, imported for side-effects
 from .data import COMMANDS
 from lark import Transformer as TransformerBase, Token
-from typing import List, Any, Union
+from typing import List, Any
 
 HAS_ARG = {
     r"_",
@@ -103,43 +103,39 @@ class Transformer(TransformerBase):  # type:ignore
 
     def WS(self, ch: Token) -> str:
         """Handle whitespace token."""
-        return ch.value  # type:ignore
+        return str(ch.value)
 
 
 def _convert_math(items: List[Any]) -> str:
-    r: List[Union[str, List[Any]]] = []
+    r: List[List[str]] = []
     stack: List[str] = []
 
     def visitor(
-        r: List[Union[str, List[Any]]], stack: List[str], items: List[Any]
+        r: List[List[str]],
+        stack: List[str],
+        items: List[Any],
     ) -> None:
-        pop = -1
+        initial_stack = stack.copy()
         for x in items:
-            if pop >= 0:
-                pop -= 1
-            if isinstance(x, str):
-                if x in HAS_ARG:
-                    if x == r"\sqrt":
-                        r.append(r"\sqrt")
-                        stack.append(r"\overline")
-                    else:
-                        stack.append(x)
-                    pop = 1
-                elif not x.isspace() or (stack and stack[-1] == r"\text"):
-                    r.append(stack.copy() + [x])
-            elif isinstance(x, list):
-                visitor(r, stack, x)
+            if isinstance(x, str) and x in HAS_ARG:
+                if x == r"\sqrt":
+                    r.append(stack.copy() + [r"\sqrt"])
+                    stack.append(r"\overline")
+                else:
+                    stack.append(x)
             else:
-                assert False  # should never happen
-            if pop == 0:
-                stack.pop()
+                if isinstance(x, list):
+                    visitor(r, stack, x)
+                elif isinstance(x, str):
+                    if not x.isspace() or (stack and stack[-1] == r"\text"):
+                        r.append(stack.copy() + [x])
+                else:
+                    assert False  # should never happen
+                stack[:] = initial_stack
 
     visitor(r, stack, items)
 
-    for i, x in enumerate(r):
-        r[i] = _handle_cmds(x)  # type:ignore
-
-    return "".join(str(x) for x in r)
+    return "".join(_handle_cmds(x) for x in r)
 
 
 def _handle_cmds(items: List[str]) -> str:

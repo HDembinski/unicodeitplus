@@ -12,9 +12,9 @@ PARSE_TEST_CASES = {
     r"$\sqrt{abcd}$": "√𝑎̅𝑏̅𝑐̅𝑑̅",
     r"$p_T / \text{GeV}c^{-1}$": "𝑝ₜ/GeV𝑐⁻¹",
     (
-        r"Search for resonant $ \mathrm{t}\overline{\mathrm{t}} $"
-        r" production in proton-proton collisions at $ \sqrt{s}=13 $ TeV"
-    ): "Search for resonant tt̅ production in proton-proton collisions at √𝑠̅=13 TeV",
+        r"Search for $ \mathrm{t}\overline{\mathrm{t}} $"
+        r" in collisions at $ \sqrt{s}=13 $ TeV"
+    ): "Search for tt̅ in collisions at √𝑠̅=13 TeV",
     r"$\overline {\mathrm{a} b}$ foo": "a̅𝑏̅ foo",
     "{abc{d{e}}a}   {}": "{abc{d{e}}a}   {}",
 }
@@ -56,6 +56,7 @@ REPLACE_TEST_CASES = {
     r"\because": "∵",
     r"\subset": "⊂",
     r"\supset": "⊃",
+    r"p_\text{T} \text T": "𝑝ₜT",
 }
 
 
