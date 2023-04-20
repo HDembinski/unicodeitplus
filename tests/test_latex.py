@@ -18,6 +18,6 @@ LATEX_TEST_CASES = {
 }
 
 
-@pytest.mark.parameterize("latex,expected", LATEX_TEST_CASES.items())
+@pytest.mark.parametrize("latex,expected", LATEX_TEST_CASES.items())
 def test_test_strings(latex, expected):
     assert replace(latex) == expected

@@ -1,3 +1,8 @@
+"""
+Parser for simple LaTeX.
+
+This parser supports only the simple subject of LaTeX that we typically use.
+"""
 from lark import Lark
 
 parser = Lark(

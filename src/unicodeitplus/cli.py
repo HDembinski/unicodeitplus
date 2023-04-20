@@ -4,7 +4,7 @@ import sys
 from unicodeitplus import replace
 
 
-def main():
+def main() -> int:
     """Console script for unicodeitplus."""
     parser = argparse.ArgumentParser()
     parser.add_argument("_", nargs="*")

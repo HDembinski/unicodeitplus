@@ -1,6 +1,8 @@
 """Tools to transform LaTeX tree into unicode."""
 from .data import COMMANDS
-from lark import Tree
+from lark import Tree, Token
+from typing import Optional, List, Union
+from dataclasses import dataclass
 
 
 HAS_ARG = {
@@ -59,14 +61,62 @@ ESCAPED = {
 }
 
 
-def handle_cmd(state, x):
+@dataclass
+class State:
+    """Current state of the transform function."""
+
+    math: bool
+    group: bool
+    command: List[str]
+
+
+def transform(ch: Union[Token, Tree], state: Optional[State] = None) -> str:
+    """Transform Lark Tree into unicode string."""
+    if state is None:
+        state = State(False, False, [])
+
+    if isinstance(ch, Tree):
+        r = []
+        if ch.data == "math":
+            state.math = True
+        if ch.data == "group":
+            state.group = True
+        for x in ch.children:
+            r.append(transform(x, state))
+        if ch.data == "math":
+            state.math = False
+        if ch.data == "group":
+            state.group = False
+            if state.command:
+                state.command.clear()
+        return "".join(r)
+
+    if ch.type == "CHARACTER":
+        x = ESCAPED.get(ch.value, ch.value)
+        return _handle_cmd(state, x)
+    if ch.type == "WS":
+        return "" if state.math else " "
+    if ch.type == "COMMAND":
+        x = ch.value.strip()
+        if x in HAS_ARG:
+            if x == r"\sqrt":
+                state.command.append(r"\overline")
+                return COMMANDS[r"\sqrt"]
+            state.command.append(x)
+            return ""
+        return _handle_cmd(state, x)
+    # never arrive here
+    assert False, f"unknown token {ch}"  # nosec
+
+
+def _handle_cmd(state: State, x: str) -> str:
     # - x can be a character or a command, like \alpha
-    # - state["command"] contains stack with commands, may be empty
+    # - state.command contains stack with commands, may be empty
     # - to transform ^{\alpha} or \text{x} correctly, we first try to
     #   convert innermost command and x as a unit
     # - they are treated independently only if previous step fails
-    cmd_stack = state["command"].copy()
-    if state["math"]:
+    cmd_stack = state.command.copy()
+    if state.math:
         cmd = cmd_stack[-1] if cmd_stack else ""
         latex = f"{cmd}{{{x}}}"
         if cmd and latex in COMMANDS:
@@ -90,50 +140,8 @@ def handle_cmd(state, x):
                 elif cmd not in IGNORE_AS_FALLBACK:
                     x = latex
     else:
-        for cmd in reversed(state["command"]):
+        for cmd in reversed(state.command):
             x = f"{cmd}{{{x}}}"
-    if state["command"] and not state["group"]:
-        state["command"].pop()
+    if state.command and not state.group:
+        state.command.pop()
     return x
-
-
-def transform(ch, state=None):
-    if state is None:
-        state = {
-            "math": False,
-            "command": [],
-            "group": False,
-        }
-
-    if isinstance(ch, Tree):
-        r = []
-        if ch.data == "math":
-            state["math"] = True
-        if ch.data == "group":
-            state["group"] = True
-        for x in ch.children:
-            r.append(transform(x, state))
-        if ch.data == "math":
-            state["math"] = False
-        if ch.data == "group":
-            state["group"] = False
-            if state["command"]:
-                state["command"].clear()
-        return "".join(r)
-
-    if ch.type == "CHARACTER":
-        x = ESCAPED.get(ch.value, ch.value)
-        return handle_cmd(state, x)
-    if ch.type == "WS":
-        return "" if state["math"] else " "
-    if ch.type == "COMMAND":
-        x = ch.value.strip()
-        if x in HAS_ARG:
-            if x == r"\sqrt":
-                state["command"].append(r"\overline")
-                return COMMANDS[r"\sqrt"]
-            state["command"].append(x)
-            return ""
-        return handle_cmd(state, x)
-    # never arrive here
-    assert False, f"unknown token {ch}"  # nosec

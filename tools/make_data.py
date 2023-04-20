@@ -125,11 +125,14 @@ cmds["h"] = "ℎ"
 
 with open(project_dir / "src" / "unicodeitplus" / "data.py", "w") as f:
     f.write(
-        """\
-# Symbols extracted from extern/unimathsymbols.txt, which is under Copyright 2011 by
-# Günter Milde and licensed under the LaTeX Project Public License (LPPL).
-#
-# As a Derived Work, this file is licensed under LaTeX Project Public License (LPPL).
+        """\"\"\"
+Symbols extracted from extern/unimathsymbols.txt.
+
+extern/unimathsymbols.txt is under Copyright 2011 by Günter Milde and licensed under the
+LaTeX Project Public License (LPPL).
+
+As a Derived Work, this file is licensed under LaTeX Project Public License (LPPL).
+\"\"\"
 
 """
     )
@@ -137,5 +140,5 @@ with open(project_dir / "src" / "unicodeitplus" / "data.py", "w") as f:
     f.write("COMMANDS = {\n")
     for key in sorted(cmds):
         val = cmds[key]
-        f.write(f"  {key!r}: {val!r},\n")
+        f.write(f"    {key!r}: {val!r},\n")
     f.write("}\n")
