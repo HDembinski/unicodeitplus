@@ -94,7 +94,7 @@ class Transformer(TransformerBase):  # type:ignore
         Here the actual magic happens. The challenge is to treat macros which accept an
         argument correctly, while respecting the grouping. A command which accepts an
         argument acts on the next character or group. Groups can be nested, so we need
-        to handle this.
+        to handle this with recursion.
 
         First, a recursive visitor with a command stack converts nested macros and
         groups into a list of flat lists of commands which end in a leaf (a charactor or
