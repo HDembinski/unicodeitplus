@@ -42,7 +42,7 @@ def test_replace(latex):
 
 
 PARSE_TEST_CASES = {
-    r"foo?!-1+2. \}  \\ $bar$": r"foo?!-1+2. }  \ 𝑏𝑎𝑟",
+    r"foo?!-1+2.;'\" \}  \\ $bar$": r"foo?!-1+2.;'\" }  \ 𝑏𝑎𝑟",
     r"$\left(\mathbf{\alpha + 1}^2_x y\right)$ bar": "(𝛂+𝟏²ₓ𝑦) bar",
     r"$\beta^{12}$ $\bar p {}^foo$ $\bar \mathrm{t}$ ": "𝛽¹² 𝑝̄ᶠ𝑜𝑜 t̄ ",
     r"$D^{\ast\ast} \to hhee$": "𝐷**→ℎℎ𝑒𝑒",

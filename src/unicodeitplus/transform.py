@@ -1,49 +1,9 @@
 """Tools to transform LaTeX tree into unicode."""
 from . import _make_data  # noqa, imported for side-effects
-from .data import COMMANDS
+from .data import COMMANDS, HAS_ARG
 from lark import Transformer as TransformerBase, Token
 from typing import List, Any
 
-HAS_ARG = {
-    r"_",
-    r"^",
-    r"\grave",
-    r"\acute",
-    r"\hat",
-    r"\tilde",
-    r"\bar",
-    r"\overline",
-    r"\breve",
-    r"\dot",
-    r"\ddot",
-    r"\slash",
-    r"\mathcal",
-    r"\mathbf",
-    r"\mathbb",
-    r"\mathring",
-    r"\mathrm",
-    r"\check",
-    r"\utilde",
-    r"\underbar",
-    r"\underline",
-    r"\not",
-    r"\lvec",
-    r"\vec",
-    r"\LVec",
-    r"\vec",
-    r"\dddot",
-    r"\ddddot",
-    r"\overleftrightarrow",
-    r"\underleftarrow",
-    r"\underrightarrow",
-    r"\text",
-    r"\left",
-    r"\right",
-    r"\big",
-    r"\Big",
-    r"\Bigg",
-    r"\sqrt",
-}
 
 IGNORE_AS_FALLBACK = {
     r"\text",
@@ -59,6 +19,8 @@ IGNORE_AS_FALLBACK = {
 ESCAPED = {
     r"\}": "}",
     r"\{": "{",
+    r"\_": "_",
+    r"\^": "^",
     "\\\\": "\\",
 }
 
