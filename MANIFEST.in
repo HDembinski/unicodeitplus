@@ -1,0 +1,10 @@
+include *.rst
+include LICENSE
+include Makefile
+include pyproject.toml
+include setup.py
+graft src
+graft tools
+graft extern
+graft docs
+graft tests

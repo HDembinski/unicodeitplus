@@ -14,6 +14,7 @@ eggs/
 .eggs/
 *.egg-info/
 *.egg
+MANIFEST
 
 # Unit test / coverage reports
 htmlcov/
