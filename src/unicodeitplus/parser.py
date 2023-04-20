@@ -4,7 +4,7 @@ Parser for simple LaTeX.
 This parser supports only the simple subject of LaTeX that we typically use.
 """
 from lark import Lark
-from .transform import Transformer
+from .transform import ToUnicode
 
 grammar = r"""
 start: (item | math)*
@@ -28,4 +28,4 @@ COMMAND: (("\\" WORD WS*) | SUBSCRIPT | SUPERSCRIPT)
 %import common.WORD
 """
 
-parser = Lark(grammar, parser="lalr", transformer=Transformer())
+parser = Lark(grammar, parser="lalr", transformer=ToUnicode())

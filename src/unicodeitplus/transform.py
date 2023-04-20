@@ -1,7 +1,7 @@
 """Tools to transform LaTeX tree into unicode."""
 from . import _make_data  # noqa, imported for side-effects
 from .data import COMMANDS, HAS_ARG
-from lark import Transformer as TransformerBase, Token
+from lark import Transformer, Token
 from typing import List, Any
 
 
@@ -31,7 +31,7 @@ ESCAPED = {
 }
 
 
-class Transformer(TransformerBase):  # type:ignore
+class ToUnicode(Transformer):  # type:ignore
     """Convert Tree to Unicode."""
 
     def start(self, ch: List[Any]) -> str:
