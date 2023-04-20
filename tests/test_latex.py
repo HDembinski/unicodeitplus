@@ -1,7 +1,7 @@
 import pytest
-from unicodeitplus import replace
+from unicodeitplus import parse, replace
 
-LATEX_TEST_CASES = {
+PARSE_TEST_CASES = {
     r"foo?!-1+2. \}  \\ ": r"foo?!-1+2. } \ ",
     r"$\left(\mathbf{\alpha + 1}^2_x y\right)$ bar": "(𝛂+𝟏²ₓ𝑦) bar",
     r"$\beta^{12}$ $\bar p {}^foo$ $\bar \mathrm{t}$ ": "𝛽¹² 𝑝̄ᶠ𝑜𝑜 t̄ ",
@@ -18,6 +18,43 @@ LATEX_TEST_CASES = {
 }
 
 
-@pytest.mark.parametrize("latex,expected", LATEX_TEST_CASES.items())
-def test_test_strings(latex, expected):
+@pytest.mark.parametrize("latex,expected", PARSE_TEST_CASES.items())
+def test_parse(latex, expected):
+    assert parse(latex) == expected
+
+
+REPLACE_TEST_CASES = {
+    r"\infty": "∞",
+    r"e^+": "𝑒⁺",
+    r"\mu^-": "𝜇⁻",
+    r"\int\sum\partial": "∫∑∂",
+    r"\to": "→",
+    r"p\bar{p}": "𝑝𝑝̄",
+    r"\mathrm{p}\bar{\mathrm{p}}": "pp̄",
+    r"\mathcal{H}": "ℋ",
+    r"\mathbb{R}": "ℝ",
+    r"\slash{\partial}": "∂̸",
+    r"\underline{x}": "𝑥̲",
+    r"\phone": "☎",
+    r"\checkmark": "✓",
+    r"\dot{x}": "𝑥̇",
+    r"\ddot{x}": "𝑥̈",
+    r"A^6": "𝐴⁶",
+    r"m_0": "𝑚₀",
+    r"\Im": "ℑ",
+    r"\Re": "ℜ",
+    r"\hbar": "ℏ",
+    r"\gamma": "𝛾",
+    r"\Gamma": "𝛤",
+    r"\perp": "⟂",
+    r"\parallel": "∥",
+    r"\therefore": "∴",
+    r"\because": "∵",
+    r"\subset": "⊂",
+    r"\supset": "⊃",
+}
+
+
+@pytest.mark.parametrize("latex,expected", REPLACE_TEST_CASES.items())
+def test_replace(latex, expected):
     assert replace(latex) == expected
