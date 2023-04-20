@@ -9,7 +9,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("ARG", nargs="+", help="some LaTeX code")
     args = parser.parse_args()
-    sargs = " ".join(args._)
+    sargs = " ".join(args.ARG)
     if "$" not in sargs:
         s = replace(sargs)
     else:

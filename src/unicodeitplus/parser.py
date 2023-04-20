@@ -17,7 +17,7 @@ start: (item | math)*
     | group
 
 CHARACTER: /[^%#&\{\}^_]/ | ESCAPED
-ESCAPED: "\\\\" | "\\#" | "\\%" | "\\&"  | "\\{" | "\\}" | "\\_"
+ESCAPED: "\\\\" | "\\#" | "\\%" | "\\&"  | "\\{" | "\\}" | "\\_" | "\\,"
 group: "{" item* "}"
 math: "$" item* "$"
 SUBSCRIPT: "_"

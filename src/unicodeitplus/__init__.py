@@ -2,17 +2,9 @@
 from importlib.metadata import version
 from .parser import parser
 from .transform import transform
-from pathlib import Path
 
 __version__ = version("unicodeitplus")
-__all__ = ["replace"]
-
-_cdir = Path(__file__).parent
-_make_data = _cdir / "_make_data.py"
-if _make_data.stat().st_mtime > (_cdir / "data.py").stat().st_mtime:
-    from importlib import import_module
-
-    import_module("unicodeitplus._make_data").write_data()
+__all__ = ["replace", "parse"]
 
 
 def parse(s: str) -> str:

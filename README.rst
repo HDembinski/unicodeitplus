@@ -19,10 +19,10 @@ Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt``
 
 Caveats
 -------
-- Only a subset of all LaTeX code can be converted to Unicode. Some Unicode characters simply don't exist. For example, subscript characters exist only for a subset of all lowercase latin characters, and there are no subscript characters for uppercase latin characters.
+- Only a subset of all LaTeX code can be converted to Unicode. Some Unicode characters simply don't exist. For example, subscript characters exist only for a subset of all lowercase latin characters, there are no subscript characters for uppercase latin characters, and all subscript or superscript characters are in roman font (upright).
+- Some code is rendered the best best approximation, for example, ``p_T`` as ``𝑝ₜ``, assuming that a reasonable approximation is preferred over a failed conversion.
 - Your font needs to contain glyphs for the Unicode characters, otherwise you will typically see a little box with the unicode character index.
 - The visually best results seem to be obtained with monospace fonts.
-- Some conversions are deliberate approximations, for example, ``p_T`` is rendered as ``𝑝ₜ``.
 
 Examples
 --------

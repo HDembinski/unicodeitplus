@@ -1,7 +1,5 @@
-import pathlib
+from pathlib import Path
 from typing import Dict
-
-project_dir = pathlib.Path(__file__).parent.parent.parent
 
 
 def _generate_sub_and_super_scripts() -> Dict[str, str]:
@@ -73,6 +71,15 @@ def _generate_sub_and_super_scripts() -> Dict[str, str]:
 
 
 def _generate_from_unimathsymbols_txt() -> Dict[str, str]:
+    d = Path(__file__).parent
+    fn = None
+    while d.parent is not None:
+        d = d.parent
+        if (d / "extern").exists():
+            fn = d / "extern" / "unimathsymbols.txt"
+            break
+    assert fn is not None
+
     # Symbols extracted from extern/unimathsymbols.txt, which is under Copyright 2011 by
     # Günter Milde and licensed under the LaTeX Project Public License (LPPL)
     def match(comments: str) -> str:
@@ -89,7 +96,7 @@ def _generate_from_unimathsymbols_txt() -> Dict[str, str]:
         assert False, f"unmatched: {comments}"  # nosec, never arrive here
 
     cmds = {}
-    with open(project_dir / "extern" / "unimathsymbols.txt") as f:
+    with open(fn) as f:
         for line in f:
             if line.startswith("#"):
                 continue
@@ -115,23 +122,36 @@ def _generate_from_unimathsymbols_txt() -> Dict[str, str]:
     return cmds
 
 
-def write_data() -> None:
-    """Write data.py with database of known LaTeX commands."""
-    cmds = _generate_sub_and_super_scripts()
-    cmds.update(_generate_from_unimathsymbols_txt())
-
-    # enhancements and aliases
-    cmds[r"\to"] = cmds[r"\rightarrow"]
+def _corrections_and_enhancements() -> Dict[str, str]:
+    cmds = {}
     cmds[r"^{\ast}"] = "*"
-    cmds[r"\hbar"] = cmds[r"\hslash"]
     cmds["h"] = "ℎ"
     cmds[r"\partial"] = "∂"
     cmds[r"\slash"] = "\u0338"
     cmds[r"\phone"] = "☎"
+    cmds[r"\thinspace"] = "\u2009"
+    return cmds
 
-    with open(project_dir / "src" / "unicodeitplus" / "data.py", "w") as f:
-        f.write(
-            """\"\"\"
+
+def _aliases(cmds: Dict[str, str]) -> None:
+    alias = {
+        r"\rightarrow": r"\to",
+        r"\hslash": r"\hbar",
+        r"\thinspace": r"\,",
+    }
+    for old, new in alias.items():
+        cmds[new] = cmds[old]
+
+
+def generate_data() -> str:
+    """Generate source code for Python module with database of known LaTeX commands."""
+    cmds = _generate_sub_and_super_scripts()
+    cmds.update(_generate_from_unimathsymbols_txt())
+    cmds.update(_corrections_and_enhancements())
+    _aliases(cmds)
+
+    chunks = [
+        """\"\"\"
 Symbols extracted from extern/unimathsymbols.txt.
 
 extern/unimathsymbols.txt is under Copyright 2011 by Günter Milde and licensed under the
@@ -140,11 +160,21 @@ LaTeX Project Public License (LPPL).
 As a Derived Work, this file is licensed under LaTeX Project Public License (LPPL).
 \"\"\"
 
+COMMANDS = {
 """
-        )
+    ]
+    for key in sorted(cmds):
+        val = cmds[key]
+        chunks.append(f"    {key!r}: {val!r},\n".replace("'", '"'))
+    chunks.append("}\n")
 
-        f.write("COMMANDS = {\n")
-        for key in sorted(cmds):
-            val = cmds[key]
-            f.write(f"    {key!r}: {val!r},\n")
-        f.write("}\n")
+    return "".join(chunks)
+
+
+if __name__ == "__main__":
+    print(generate_data())
+else:
+    fn_data = Path(__file__).parent / "data.py"
+    if fn_data.stat().st_mtime < Path(__file__).stat().st_mtime:
+        with open(fn_data, "w") as f:
+            f.write(generate_data())
