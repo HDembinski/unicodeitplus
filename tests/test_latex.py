@@ -2,7 +2,7 @@ import pytest
 from unicodeitplus import parse, replace
 
 PARSE_TEST_CASES = {
-    r"foo?!-1+2. \}  \\ ": r"foo?!-1+2. } \ ",
+    r"foo?!-1+2. \}  \\ $bar$": r"foo?!-1+2. }  \ 𝑏𝑎𝑟",
     r"$\left(\mathbf{\alpha + 1}^2_x y\right)$ bar": "(𝛂+𝟏²ₓ𝑦) bar",
     r"$\beta^{12}$ $\bar p {}^foo$ $\bar \mathrm{t}$ ": "𝛽¹² 𝑝̄ᶠ𝑜𝑜 t̄ ",
     r"$D^{\ast\ast} \to hhee$": "𝐷**→ℎℎ𝑒𝑒",
@@ -15,12 +15,16 @@ PARSE_TEST_CASES = {
         r"Search for resonant $ \mathrm{t}\overline{\mathrm{t}} $"
         r" production in proton-proton collisions at $ \sqrt{s}=13 $ TeV"
     ): "Search for resonant tt̅ production in proton-proton collisions at √𝑠̅=13 TeV",
+    r"$\overline {\mathrm{a} b}$ foo": "a̅𝑏̅ foo",
+    "{abc{d{e}}a}   {}": "{abc{d{e}}a}   {}",
 }
 
 
-@pytest.mark.parametrize("latex,expected", PARSE_TEST_CASES.items())
-def test_parse(latex, expected):
-    assert parse(latex) == expected
+@pytest.mark.parametrize("case", range(len(PARSE_TEST_CASES)))
+def test_parse(case):
+    latex, expected = list(PARSE_TEST_CASES.items())[case]
+    got = parse(latex)
+    assert expected == got
 
 
 REPLACE_TEST_CASES = {
@@ -55,6 +59,8 @@ REPLACE_TEST_CASES = {
 }
 
 
-@pytest.mark.parametrize("latex,expected", REPLACE_TEST_CASES.items())
-def test_replace(latex, expected):
-    assert replace(latex) == expected
+@pytest.mark.parametrize("case", range(len(REPLACE_TEST_CASES)))
+def test_replace(case):
+    latex, expected = list(REPLACE_TEST_CASES.items())[case]
+    got = replace(latex)
+    assert expected == got
