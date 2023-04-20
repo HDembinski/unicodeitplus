@@ -1,3 +1,4 @@
+"""Generate examples for README.rst."""
 from unicodeitplus import replace
 from tabulate import tabulate
 

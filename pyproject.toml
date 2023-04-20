@@ -8,7 +8,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "unicodeitplus"
 description = "Converts simple LaTeX to an unicode approximation"
-dependencies = ["lark"]
 maintainers = [
     { name = "Hans Dembinski" },
     { email = "hans.dembinski@gmail.com" }
@@ -40,10 +39,13 @@ unicodeitplus = "unicodeitplus.cli:main"
 [tool.setuptools_scm]
 
 [tool.ruff]
+select = ["E", "F", "D"]
+extend-ignore = ["D203"]
+extend-exclude = ["src/unicodeitplus/parser.py", "docs", "setup.py"]
 fix = true
 
 [tool.ruff.per-file-ignores]
-"tests/test_latex.py" = ["B"]
+"tests/test_latex.py" = ["B", "D"]
 
 [tool.mypy]
 strict = true
@@ -51,6 +53,7 @@ no_implicit_optional = false
 allow_redefinition = true
 ignore_missing_imports = true
 show_error_codes = true
+exclude = ["/parser\\.py$"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

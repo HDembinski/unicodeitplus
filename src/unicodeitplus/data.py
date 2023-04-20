@@ -1,5 +1,4 @@
-"""
-Symbols extracted from extern/unimathsymbols.txt.
+"""Symbols extracted from extern/unimathsymbols.txt.
 
 extern/unimathsymbols.txt is under Copyright 2011 by Günter Milde and licensed under the
 LaTeX Project Public License (LPPL).

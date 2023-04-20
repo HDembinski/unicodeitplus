@@ -1,7 +1,7 @@
 """Tools to transform LaTeX tree into unicode."""
 from . import _make_data  # noqa, imported for side-effects
 from .data import COMMANDS
-from lark import Tree, Token
+from .parser import Tree, Token
 from typing import Optional, List, Union
 from dataclasses import dataclass
 

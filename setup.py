@@ -5,14 +5,12 @@ from contextlib import contextmanager
 
 @contextmanager
 def merge_license_files():
-    """
-    Merge LICENSE and LICENSES_bundled for sdist creation.
+    """Merge LICENSE and LICENSES_bundled for sdist creation.
 
     This follows the approach of Scipy and is to keep LICENSE in repo as an
     exact BSD 3-clause, to make GitHub state correctly how unicodeitplus
     is licensed.
     """
-
     l1 = "LICENSE"
     l2 = "LICENSES_bundled"
 

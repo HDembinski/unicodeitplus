@@ -24,25 +24,16 @@ repos:
   hooks:
   - id: black
 
-# Python docstring formatting
-- repo: https://github.com/pycqa/pydocstyle
-  rev: 6.3.0
-  hooks:
-  - id: pydocstyle
-    files: src/unicodeitplus/[^_].*\.py
-    additional_dependencies: [tomli]
-
 # Ruff linter, replacement for flake8
 - repo: https://github.com/charliermarsh/ruff-pre-commit
   rev: 'v0.0.261'
   hooks:
     - id: ruff
 
-# Python type checking
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: 'v1.2.0'
-  hooks:
-  - id: mypy
-    additional_dependencies: [numpy]
-    args: [src]
-    pass_filenames: false
+# # Python type checking
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: 'v1.2.0'
+#   hooks:
+#   - id: mypy
+#     args: [src]
+#     pass_filenames: false
