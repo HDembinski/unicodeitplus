@@ -12,7 +12,9 @@ This package is a more complete LaTeX to Unicode converter than `unicodeit <http
 Examples
 --------
 
--------------------------------  ---------
+===============================  =========
+LaTeX                            Unicode
+===============================  =========
 \alpha                           𝛼
 \beta                            𝛽
 \gamma                           𝛾
@@ -50,4 +52,4 @@ m_0                              𝑚₀
 \subset                          ⊂
 \supset                          ⊃
 p_T\fracslash\mathrm{GeV}c^{-1}  𝑝ₜ⁄GeV𝑐⁻¹
--------------------------------  ---------
+===============================  =========

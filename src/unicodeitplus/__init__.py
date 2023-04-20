@@ -12,7 +12,7 @@ _make_data = _cdir / "_make_data.py"
 if _make_data.stat().st_mtime > (_cdir / "data.py").stat().st_mtime:
     from importlib import import_module
 
-    import_module("unicodeitplus._make_data")
+    import_module("unicodeitplus._make_data").write_data()
 
 
 def parse(s: str) -> str:

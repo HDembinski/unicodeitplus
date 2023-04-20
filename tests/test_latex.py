@@ -10,7 +10,7 @@ PARSE_TEST_CASES = {
     r"$\sqrt {1Aas\alpha}$": "√1̅𝐴̅𝑎̅𝑠̅𝛼̅",
     r"$\vec{x} b^2 \vec\alpha\overline\alpha K^0_S p_\text{T} \text T$": "𝑥⃗𝑏²𝛼⃗𝛼̅𝐾⁰ₛ𝑝ₜT",
     r"$\sqrt{abcd}$": "√𝑎̅𝑏̅𝑐̅𝑑̅",
-    r"$p_T / \text{GeV}c^{-1}$": "𝑝ₜ⁄GeV𝑐⁻¹",
+    r"$p_T / \text{GeV}c^{-1}$": "𝑝ₜ/GeV𝑐⁻¹",
     (
         r"Search for resonant $ \mathrm{t}\overline{\mathrm{t}} $"
         r" production in proton-proton collisions at $ \sqrt{s}=13 $ TeV"
