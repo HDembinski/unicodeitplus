@@ -67,7 +67,15 @@ class Transformer(TransformerBase):  # type:ignore
     """Convert Tree to Unicode."""
 
     def start(self, ch: List[Any]) -> str:
-        """Handle start token."""
+        """
+        Return final unicode.
+
+        The start token is handled last, because the transformer
+        starts from the leafs. So when we arrive here, everything
+        else is already transformed into strings. We only need
+        to handle escaped characters correctly and recursively
+        unparse groups.
+        """
         r: List[str] = []
 
         def visitor(r: List[str], ch: List[Any]) -> None:
@@ -86,65 +94,88 @@ class Transformer(TransformerBase):  # type:ignore
         return "".join(r)
 
     def CHARACTER(self, ch: Token) -> str:
-        """Handle character token."""
+        """
+        Handle character token.
+
+        This is either a single charactor or an escaped character sequence.
+        """
         return ch.value  # type:ignore
 
+    WS = CHARACTER
+
     def COMMAND(self, ch: Token) -> str:
-        """Handle command token."""
+        """
+        Handle command token.
+
+        We need to strip the whitespace which may be there.
+        """
         return ch.value.strip()  # type:ignore
 
-    def math(self, ch: List[Any]) -> str:
-        """Handle math token."""
-        return _convert_math(ch)
+    def group(self, items: List[Any]) -> List[Any]:
+        """
+        Handle group token.
 
-    def group(self, ch: List[Any]) -> List[Any]:
-        """Handle group token."""
-        return ch
+        Nothing to do, we just the children as a list.
+        """
+        return items
 
-    def WS(self, ch: Token) -> str:
-        """Handle whitespace token."""
-        return str(ch.value)
+    def math(self, items: List[Any]) -> str:
+        """
+        Handle math token.
 
+        Here the actual magic happens. The challenge is to treat macros which accept an
+        argument correctly, while respecting the grouping. A command which accepts an
+        argument acts on the next character or group. Groups can be nested, so we need
+        to handle this.
 
-def _convert_math(items: List[Any]) -> str:
-    def visitor(
-        r: List[List[str]],
-        stack: List[str],
-        items: List[Any],
-    ) -> None:
-        initial_stack = stack.copy()
-        for x in items:
-            if isinstance(x, str) and x in HAS_ARG:
-                if x == r"\sqrt":
-                    r.append(stack.copy() + [r"\sqrt"])
-                    stack.append(r"\overline")
+        First, a recursive visitor with a command stack converts nested macros and
+        groups into a list of flat lists of commands which end in a leaf (a charactor or
+        command that accepts no argument).
+
+        Then, we convert each list of commands with the function _handle_cmds into
+        unicode. See comments in that function for details.
+        """
+
+        def visitor(
+            r: List[List[str]],
+            stack: List[str],
+            items: List[Any],
+        ) -> None:
+            initial_stack = stack.copy()
+            for x in items:
+                if isinstance(x, str) and x in HAS_ARG:
+                    if x == r"\sqrt":
+                        r.append(stack.copy() + [r"\sqrt"])
+                        stack.append(r"\overline")
+                    else:
+                        stack.append(x)
                 else:
-                    stack.append(x)
-            else:
-                if isinstance(x, list):
-                    visitor(r, stack, x)
-                elif isinstance(x, str):
-                    if not x.isspace() or (stack and stack[-1] == r"\text"):
-                        r.append(stack.copy() + [x])
-                else:
-                    assert False  # should never happen
-                stack[:] = initial_stack
+                    if isinstance(x, list):
+                        visitor(r, stack, x)
+                    elif isinstance(x, str):
+                        if not x.isspace() or (stack and stack[-1] == r"\text"):
+                            r.append(stack.copy() + [x])
+                    else:
+                        assert False  # should never happen
+                    stack[:] = initial_stack
 
-    r: List[List[str]] = []
-    visitor(r, [], items)
-    return "".join(_handle_cmds(x) for x in r)
+        r: List[List[str]] = []
+        visitor(r, [], items)
+        return "".join(_handle_cmds(x[:-1], x[-1]) for x in r)
 
 
-def _handle_cmds(items: List[str]) -> str:
-    # - x can be a character or a command, like \alpha
-    # - cmd_stack contains stack with commands, may be empty
-    # - to transform ^{\alpha} or \text{x} correctly, we first try to
-    #   convert innermost command and x as a unit
-    # - commands are treated independently only if previous step fails
-    *cmd_stack, x = items
-    if cmd_stack:
+def _handle_cmds(cmds: List[str], x: str) -> str:
+    # - x can be character or command, like \alpha
+    # - cmds contains commands to apply, may be empty
+    # - to transform ^{\alpha} or \text{x} correctly,
+    #   we first try to convert innermost command and x
+    #   as unit; if this fails we treat commands sequentially
+    # - other commands in cmds must be modifiers like \dot or
+    #   \vec that are converted into diacritical characters
+    # - if we cannot convert, we return unconverted LaTeX
+    if cmds:
         innermost = True
-        for cmd in reversed(cmd_stack):
+        for cmd in reversed(cmds):
             latex = f"{cmd}{{{x}}}"
             if latex in COMMANDS:
                 x = COMMANDS[latex]
