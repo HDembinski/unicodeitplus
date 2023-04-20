@@ -1,0 +1,48 @@
+repos:
+# Standard hooks
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: check-case-conflict
+  - id: check-docstring-first
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-symlinks
+  - id: check-yaml
+    args: ["--allow-multiple-documents"]
+  - id: debug-statements
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: sort-simple-yaml
+  - id: file-contents-sorter
+  - id: trailing-whitespace
+    exclude: ^doc/_static/.*.svg
+
+# Python formatting
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+  - id: black
+
+# Python docstring formatting
+- repo: https://github.com/pycqa/pydocstyle
+  rev: 6.3.0
+  hooks:
+  - id: pydocstyle
+    files: src/unicodeitplus/[^_].*\.py
+    additional_dependencies: [tomli]
+
+# Ruff linter, replacement for flake8
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: 'v0.0.261'
+  hooks:
+    - id: ruff
+
+# Python type checking
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: 'v1.2.0'
+  hooks:
+  - id: mypy
+    additional_dependencies: [numpy]
+    args: [src]
+    pass_filenames: false
