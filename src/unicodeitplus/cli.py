@@ -14,7 +14,7 @@ def main() -> int:
         s = replace(sargs)
     else:
         s = parse(sargs)
-    print(s)
+    sys.stdout.write(s + "\n")
     return 0
 
 
