@@ -6,7 +6,7 @@ This parser supports only the simple subject of LaTeX that we typically use.
 from lark import Lark
 from .transform import Transformer
 
-grammar = """
+grammar = r"""
 start: (item | math)*
 
 ?atom: CHARACTER
