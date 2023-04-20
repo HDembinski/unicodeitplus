@@ -15,7 +15,7 @@ I want to eventually merge this project into ``unicodeit``, discussions with the
 
 LaTeX to Unicode: How does this even work?
 ------------------------------------------
-Unicode contains many subscript and superscript characters. It also contains font variations of characters of both latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
+Unicode contains many subscript and superscript characters. It also contains font variations of latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
 
 Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt`` from Günter Milde, which provides the mapping between LaTeX macros and Unicode symbols.
 
