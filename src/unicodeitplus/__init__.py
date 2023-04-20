@@ -6,7 +6,7 @@ try:
 except Exception:
     pass
 
-from .parser import Lark_StandAlone
+from .parser import parser
 from .transform import transform
 
 __all__ = ["replace", "parse"]
@@ -14,7 +14,6 @@ __all__ = ["replace", "parse"]
 
 def parse(s: str) -> str:
     """Parse simple LaTeX code and replace it by an unicode approximation."""
-    parser = Lark_StandAlone()
     tree = parser.parse(s)
     return transform(tree)
 

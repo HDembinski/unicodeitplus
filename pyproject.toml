@@ -8,6 +8,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "unicodeitplus"
 description = "Converts simple LaTeX to an unicode approximation"
+dependencies = ["lark"]
 maintainers = [
     { name = "Hans Dembinski" },
     { email = "hans.dembinski@gmail.com" }
