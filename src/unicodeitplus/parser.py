@@ -9,4 +9,4 @@ from pathlib import Path
 with open(Path(__file__).parent / "latex.g") as f:
     grammar = f.read()
 
-parser = Lark(f.read(), parser="lalr")
+parser = Lark(grammar, parser="lalr")
