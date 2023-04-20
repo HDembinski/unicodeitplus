@@ -7,13 +7,15 @@ unicodeitplus
 
 Convert simple LaTeX into an unicode approximation and paste it anywhere.
 
-This package provides a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. unicodeitplus uses a better parser (generated from EBNF with the fantastic `Lark library <https://github.com/lark-parser/lark>`_) than ``unicodeit``, which handles some code on which ``unicodeit`` fails, and allows one to parse a mix of text and math code, like::
+This package provides a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. ``unicodeitplus`` uses a better parser (generated from EBNF with the fantastic `Lark library <https://github.com/lark-parser/lark>`_) than ``unicodeit``, which handles some code on which ``unicodeit`` fails, and allows one to parse a mix of text and math code, like::
 
     $p_T$ / GeV $c^{-1}$
 
+I want to eventually merge this project into ``unicodeit``, discussions with the maintainer of ``unicodeit`` are ongoing.
+
 LaTeX to Unicode: How does this even work?
 ------------------------------------------
-Unicode contains many subscript and superscript characters. It also font variations of characters of both latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
+Unicode contains many subscript and superscript characters. It also contains font variations of characters of both latin and greek characters, including italic, boldface, bold italic, and more. It contains a lot of special mathematical characters and diacritical marks, which we use to approximate LaTeX renderings using just unicode characters.
 
 Like ``unicodeit``, ``unicodeitplus`` is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
 
