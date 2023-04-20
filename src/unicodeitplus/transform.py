@@ -7,8 +7,14 @@ from typing import List, Any
 
 IGNORE_AS_FALLBACK = {
     r"\text",
-    r"\mathbf",
+    r"\mathbb",
     r"\mathrm",
+    r"\mathbf",
+    r"\mathsf",
+    r"\mathsfbf",
+    r"\mathsfbfit",
+    r"\mathsfit",
+    r"\mathtt",
     r"\left",
     r"\right",
     r"\big",

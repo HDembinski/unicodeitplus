@@ -107,15 +107,15 @@ def _generate_from_unimathsymbols_txt() -> Tuple[Dict[str, str], Set[str]]:
             latex = latex.decode()
             latex2 = latex2.decode()
             comments = comments[:-1]
-            arg = _has_arg(latex, cls, category)
-            if b"mathaccent" in category:
+            arg = _has_arg(cls, category)
+            if arg:
                 ch = ch[-1]
             if latex:
                 if latex == ch:
                     continue
                 cmds[latex] = ch
                 if arg:
-                    has_arg.add(arg)
+                    has_arg.add(latex)
             elif latex2:
                 cmds[latex2] = ch
             elif comments.startswith(b"SUPERSCRIPT"):
@@ -130,18 +130,21 @@ def _generate_from_unimathsymbols_txt() -> Tuple[Dict[str, str], Set[str]]:
     return cmds, has_arg
 
 
-def _corrections_and_enhancements() -> Dict[str, str]:
-    cmds = {}
+def generate_data() -> str:
+    """Generate source code for Python module with database of known LaTeX commands."""
+    cmds = _generate_sub_and_super_scripts()
+    cmds2, has_arg = _generate_from_unimathsymbols_txt()
+    cmds.update(cmds2)
+
+    # corrections and enhancements
     cmds[r"^{\ast}"] = "*"
     cmds["h"] = "ℎ"
     cmds[r"\partial"] = "∂"
     cmds[r"\slash"] = "\u0338"
     cmds[r"\phone"] = "☎"
     cmds[r"\thinspace"] = "\u2009"
-    return cmds
 
-
-def _aliases(cmds: Dict[str, str]) -> None:
+    # aliases
     alias = {
         r"\rightarrow": r"\to",
         r"\hslash": r"\hbar",
@@ -150,18 +153,13 @@ def _aliases(cmds: Dict[str, str]) -> None:
     for old, new in alias.items():
         cmds[new] = cmds[old]
 
-
-def generate_data() -> str:
-    """Generate source code for Python module with database of known LaTeX commands."""
-    cmds = _generate_sub_and_super_scripts()
-    cmds2, has_arg = _generate_from_unimathsymbols_txt()
-    cmds.update(cmds2)
-    cmds.update(_corrections_and_enhancements())
-    _aliases(cmds)
+    # fill up has_arg
+    for key in cmds:
+        i = key.find("{")
+        if i > 0:
+            has_arg.add(key[:i])
 
     has_arg |= {
-        r"_",
-        r"^",
         r"\big",
         r"\Big",
         r"\Bigg",
@@ -207,13 +205,8 @@ HAS_ARG = {
     return "".join(chunks)
 
 
-def _has_arg(latex: str, cls: bytes, category: bytes) -> str:
-    i = latex.find("{")
-    if i > 0:
-        return latex[:i]
-    if cls == b"D" or category == b"mathaccent":
-        return latex
-    return ""
+def _has_arg(cls: bytes, category: bytes) -> bool:
+    return cls == b"D" or category == b"mathaccent"
 
 
 if __name__ == "__main__":
