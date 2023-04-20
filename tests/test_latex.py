@@ -1,32 +1,6 @@
 import pytest
 from unicodeitplus import parse, replace
 
-PARSE_TEST_CASES = {
-    r"foo?!-1+2. \}  \\ $bar$": r"foo?!-1+2. }  \ 𝑏𝑎𝑟",
-    r"$\left(\mathbf{\alpha + 1}^2_x y\right)$ bar": "(𝛂+𝟏²ₓ𝑦) bar",
-    r"$\beta^{12}$ $\bar p {}^foo$ $\bar \mathrm{t}$ ": "𝛽¹² 𝑝̄ᶠ𝑜𝑜 t̄ ",
-    r"$D^{\ast\ast} \to hhee$": "𝐷**→ℎℎ𝑒𝑒",
-    r"$\mathbf{xyz + 1}$": "𝐱𝐲𝐳+𝟏",
-    r"$\sqrt {1Aas\alpha}$": "√1̅𝐴̅𝑎̅𝑠̅𝛼̅",
-    r"$\vec{x} b^2 \vec\alpha\overline\alpha K^0_S p_\text{T} \text T$": "𝑥⃗𝑏²𝛼⃗𝛼̅𝐾⁰ₛ𝑝ₜT",
-    r"$\sqrt{abcd}$": "√𝑎̅𝑏̅𝑐̅𝑑̅",
-    r"$p_T / \text{GeV}c^{-1}$": "𝑝ₜ/GeV𝑐⁻¹",
-    (
-        r"Search for $ \mathrm{t}\overline{\mathrm{t}} $"
-        r" in collisions at $ \sqrt{s}=13 $ TeV"
-    ): "Search for tt̅ in collisions at √𝑠̅=13 TeV",
-    r"$\overline {\mathrm{a} b}$ foo": "a̅𝑏̅ foo",
-    "{abc{d{e}}a}   {}": "{abc{d{e}}a}   {}",
-}
-
-
-@pytest.mark.parametrize("case", range(len(PARSE_TEST_CASES)))
-def test_parse(case):
-    latex, expected = list(PARSE_TEST_CASES.items())[case]
-    got = parse(latex)
-    assert expected == got
-
-
 REPLACE_TEST_CASES = {
     r"\infty": "∞",
     r"e^+": "𝑒⁺",
@@ -35,6 +9,7 @@ REPLACE_TEST_CASES = {
     r"\to": "→",
     r"p\bar{p}": "𝑝𝑝̄",
     r"\mathrm{p}\bar{\mathrm{p}}": "pp̄",
+    r"p_\text{T} \text T": "𝑝ₜT",
     r"\mathcal{H}": "ℋ",
     r"\mathbb{R}": "ℝ",
     r"\slash{\partial}": "∂̸",
@@ -56,12 +31,37 @@ REPLACE_TEST_CASES = {
     r"\because": "∵",
     r"\subset": "⊂",
     r"\supset": "⊃",
-    r"p_\text{T} \text T": "𝑝ₜT",
 }
 
 
-@pytest.mark.parametrize("case", range(len(REPLACE_TEST_CASES)))
-def test_replace(case):
-    latex, expected = list(REPLACE_TEST_CASES.items())[case]
+@pytest.mark.parametrize("latex", REPLACE_TEST_CASES)
+def test_replace(latex):
+    expected = REPLACE_TEST_CASES[latex]
     got = replace(latex)
+    assert expected == got
+
+
+PARSE_TEST_CASES = {
+    r"foo?!-1+2. \}  \\ $bar$": r"foo?!-1+2. }  \ 𝑏𝑎𝑟",
+    r"$\left(\mathbf{\alpha + 1}^2_x y\right)$ bar": "(𝛂+𝟏²ₓ𝑦) bar",
+    r"$\beta^{12}$ $\bar p {}^foo$ $\bar \mathrm{t}$ ": "𝛽¹² 𝑝̄ᶠ𝑜𝑜 t̄ ",
+    r"$D^{\ast\ast} \to hhee$": "𝐷**→ℎℎ𝑒𝑒",
+    r"$\mathbf{xyz + 1}$": "𝐱𝐲𝐳+𝟏",
+    r"$\sqrt {1Aas\alpha}$": "√1̅𝐴̅𝑎̅𝑠̅𝛼̅",
+    r"$\vec{x} b^2 \vec\alpha\overline\alpha K^0_S p_\text{T} \text T$": "𝑥⃗𝑏²𝛼⃗𝛼̅𝐾⁰ₛ𝑝ₜT",
+    r"$\sqrt{abcd}$": "√𝑎̅𝑏̅𝑐̅𝑑̅",
+    r"$p_T / \text{GeV}c^{-1}$": "𝑝ₜ/GeV𝑐⁻¹",
+    (
+        r"Search for $ \mathrm{t}\overline{\mathrm{t}} $"
+        r" in collisions at $ \sqrt{s}=13 $ TeV"
+    ): "Search for tt̅ in collisions at √𝑠̅=13 TeV",
+    r"$\overline {\mathrm{a} b}$ foo": "a̅𝑏̅ foo",
+    "{abc{d{e}}a}   {}": "{abc{d{e}}a}   {}",
+}
+
+
+@pytest.mark.parametrize("latex", PARSE_TEST_CASES)
+def test_parse(latex):
+    expected = PARSE_TEST_CASES[latex]
+    got = parse(latex)
     assert expected == got
