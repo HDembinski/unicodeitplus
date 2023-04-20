@@ -7,7 +7,9 @@ unicodeitplus
 
 Convert simple LaTeX into an unicode approximation.
 
-This package is a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. Like unicodeit, it is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
+This package provides a more complete LaTeX to Unicode converter than `unicodeit <https://github.com/svenkreiss/unicodeit/>`_. Like unicodeit, it is largely based on ``unimathsymbols.txt`` from Günter Milde, which is maps LaTeX macros to Unicode symbols.
+
+unicodeitplus uses a better parser (generated from EBNF with the fantastic `Lark library <https://github.com/lark-parser/lark>`_), which fixes a few bugs in unicodeit and also allows one to parse a mix of text and math code, like ``$p_T$ / GeV $c^{-1}$``.
 
 Examples
 --------
