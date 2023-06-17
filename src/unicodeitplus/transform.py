@@ -22,12 +22,25 @@ IGNORE_AS_FALLBACK = {
     r"\Bigg",
 }
 
-ESCAPED = {
-    r"\}": "}",
-    r"\{": "{",
-    r"\_": "_",
-    r"\^": "^",
-    "\\\\": "\\",
+# ESCAPED = {
+#     "\\\\": "\\",
+#     r"\}": "}",
+#     r"\{": "{",
+#     r"\_": "_",
+#     r"\^": "^",
+#     r"\~": "~",
+# }
+
+WHITESPACE = {
+    # unbreakable space
+    "~": "\u00A0",
+    # thinspace ~0.17em
+    r"\,": "\u2009",
+    # medspace ~0.22em
+    r"\:": "\u2005",
+    r"\>": "\u2005",
+    # thickspace ~0.28em
+    r"\;": "\u2004",
 }
 
 
@@ -49,7 +62,6 @@ class ToUnicode(Transformer):  # type:ignore
         def visitor(r: List[str], ch: List[Any]) -> None:
             for x in ch:
                 if isinstance(x, str):
-                    x = ESCAPED.get(x, x)
                     r.append(x)
                 elif isinstance(x, list):
                     r.append("{")
@@ -67,9 +79,15 @@ class ToUnicode(Transformer):  # type:ignore
 
         This is either a single charactor or an escaped character sequence.
         """
+        if ch.value.startswith("\\"):
+            return ch.value[1:]  # type:ignore
         return ch.value  # type:ignore
 
-    WS = CHARACTER
+    def WS_EXT(self, ch: Token) -> str:
+        """
+        Handle whitespace.
+        """
+        return WHITESPACE.get(ch.value, " ")
 
     def COMMAND(self, ch: Token) -> str:
         """
