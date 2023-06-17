@@ -1,5 +1,5 @@
 """
-Symbols extracted from extern/unimathsymbols.txt.
+Symbols extracted from extern/unimathsymbols.txt with extensions and corrections.
 
 extern/unimathsymbols.txt is under Copyright 2011 by Günter Milde and licensed under the
 LaTeX Project Public License (LPPL).
@@ -2133,7 +2133,7 @@ COMMANDS = {
     "\\sqsupset": "⊐",
     "\\sqsupseteq": "⊒",
     "\\sqsupsetneq": "⋥",
-    "\\square": "⬜",
+    "\\square": "□",
     "\\squarebotblack": "⬓",
     "\\squarecrossfill": "▩",
     "\\squarehfill": "▤",
@@ -2438,10 +2438,10 @@ COMMANDS = {
     "^{=}": "⁼",
     "^{A}": "ᴬ",
     "^{B}": "ᴮ",
-    "^{C}": "\ua7f2",
+    "^{C}": "ꟲ",
     "^{D}": "ᴰ",
     "^{E}": "ᴱ",
-    "^{F}": "\ua7f3",
+    "^{F}": "ꟳ",
     "^{G}": "ᴳ",
     "^{H}": "ᴴ",
     "^{I}": "ᴵ",
@@ -2452,7 +2452,7 @@ COMMANDS = {
     "^{N}": "ᴺ",
     "^{O}": "ᴼ",
     "^{P}": "ᴾ",
-    "^{Q}": "\ua7f4",
+    "^{Q}": "ꟴ",
     "^{R}": "ᴿ",
     "^{T}": "ᵀ",
     "^{U}": "ᵁ",
@@ -2484,7 +2484,7 @@ COMMANDS = {
     "^{n}": "ⁿ",
     "^{o}": "ᵒ",
     "^{p}": "ᵖ",
-    "^{q}": "\U000107a5",
+    "^{q}": "𐞥",
     "^{r}": "ʳ",
     "^{s}": "ˢ",
     "^{t}": "ᵗ",

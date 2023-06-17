@@ -1,6 +1,23 @@
 from pathlib import Path
 from typing import Dict, Tuple, Set
 
+ALIASES = {
+    r"\rightarrow": r"\to",
+    r"\hslash": r"\hbar",
+    r"\thinspace": r"\,",
+}
+
+CORRECTIONS_EXTENSIONS = {
+    r"^{\ast}": "*",
+    "h": "ℎ",
+    r"\partial": "∂",
+    r"\slash": "\u0338",
+    r"\phone": "☎",
+    r"\thinspace": "\u2009",
+    # https://github.com/HDembinski/unicodeitplus/issues/3
+    r"\square": "\u25A1",
+}
+
 
 def _generate_sub_and_super_scripts() -> Dict[str, str]:
     import string
@@ -135,22 +152,9 @@ def generate_data() -> str:
     cmds = _generate_sub_and_super_scripts()
     cmds2, has_arg = _generate_from_unimathsymbols_txt()
     cmds.update(cmds2)
+    cmds.update(CORRECTIONS_EXTENSIONS)
 
-    # corrections and enhancements
-    cmds[r"^{\ast}"] = "*"
-    cmds["h"] = "ℎ"
-    cmds[r"\partial"] = "∂"
-    cmds[r"\slash"] = "\u0338"
-    cmds[r"\phone"] = "☎"
-    cmds[r"\thinspace"] = "\u2009"
-
-    # aliases
-    alias = {
-        r"\rightarrow": r"\to",
-        r"\hslash": r"\hbar",
-        r"\thinspace": r"\,",
-    }
-    for old, new in alias.items():
+    for old, new in ALIASES.items():
         cmds[new] = cmds[old]
 
     # fill up has_arg
@@ -175,7 +179,7 @@ def generate_data() -> str:
 
     chunks = [
         """\"\"\"
-Symbols extracted from extern/unimathsymbols.txt.
+Symbols extracted from extern/unimathsymbols.txt with extensions and corrections.
 
 extern/unimathsymbols.txt is under Copyright 2011 by Günter Milde and licensed under the
 LaTeX Project Public License (LPPL).

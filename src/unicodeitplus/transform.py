@@ -30,6 +30,18 @@ ESCAPED = {
     "\\\\": "\\",
 }
 
+WHITESPACE = {
+    # unbreakable space
+    "~": "\u00A0",
+    # thinspace ~0.17em
+    r"\,": "\u2009",
+    # medspace ~0.22em
+    r"\:": "\u2005",
+    r"\>": "\u2005",
+    # thickspace ~0.28em
+    r"\;": "\u2004",
+}
+
 
 class ToUnicode(Transformer):  # type:ignore
     """Convert Tree to Unicode."""
@@ -69,7 +81,11 @@ class ToUnicode(Transformer):  # type:ignore
         """
         return ch.value  # type:ignore
 
-    WS = CHARACTER
+    def WS_EXT(self, ch: Token) -> str:
+        """
+        Handle whitespace.
+        """
+        return WHITESPACE.get(ch.value, " ")
 
     def COMMAND(self, ch: Token) -> str:
         """
