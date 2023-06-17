@@ -16,14 +16,14 @@ start: (item | math)*
     | WS_EXT+
     | group
 
-CHARACTER: /[^%#&\{\}^_]/ | ESCAPED
-ESCAPED: "\\\\" | "\\#" | "\\%" | "\\&"  | "\\{" | "\\}" | "\\_" | "\\,"
+CHARACTER: /[^%#&\{\}^_\\]/ | ESCAPED
+ESCAPED: /\\\S/
 group: "{" item* "}"
 math: "$" item* "$"
 SUBSCRIPT: "_"
 SUPERSCRIPT: "^"
 COMMAND: (("\\" WORD WS*) | SUBSCRIPT | SUPERSCRIPT)
-WS_EXT: WS | "~" | "\," | "\;" | "\:"
+WS_EXT: WS | "~" | "\," | "\;" | "\:" | "\>"
 
 %import common.WS
 %import common.WORD

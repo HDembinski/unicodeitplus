@@ -22,13 +22,14 @@ IGNORE_AS_FALLBACK = {
     r"\Bigg",
 }
 
-ESCAPED = {
-    r"\}": "}",
-    r"\{": "{",
-    r"\_": "_",
-    r"\^": "^",
-    "\\\\": "\\",
-}
+# ESCAPED = {
+#     "\\\\": "\\",
+#     r"\}": "}",
+#     r"\{": "{",
+#     r"\_": "_",
+#     r"\^": "^",
+#     r"\~": "~",
+# }
 
 WHITESPACE = {
     # unbreakable space
@@ -61,7 +62,6 @@ class ToUnicode(Transformer):  # type:ignore
         def visitor(r: List[str], ch: List[Any]) -> None:
             for x in ch:
                 if isinstance(x, str):
-                    x = ESCAPED.get(x, x)
                     r.append(x)
                 elif isinstance(x, list):
                     r.append("{")
@@ -79,6 +79,8 @@ class ToUnicode(Transformer):  # type:ignore
 
         This is either a single charactor or an escaped character sequence.
         """
+        if ch.value.startswith("\\"):
+            return ch.value[1:]  # type:ignore
         return ch.value  # type:ignore
 
     def WS_EXT(self, ch: Token) -> str:
