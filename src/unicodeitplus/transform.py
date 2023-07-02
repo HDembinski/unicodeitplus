@@ -5,7 +5,7 @@ from lark import Transformer, Token
 from typing import List, Any
 from string import ascii_letters
 import json
-import sys
+from sys import stderr
 
 
 IGNORE_AS_FALLBACK = {
@@ -55,19 +55,22 @@ class ToUnicode(Transformer):  # type:ignore
         self.preserve_roman = options.get("preserve_roman", False)
         self.preserve_math_whitespace = options.get("preserve_math_whitespace", False)
         self.preamble = options.get("preamble", None)
-        
-        self.commands = COMMANDS
+
+        # Don't copy COMMANDS just to update it, just keep track of overrides
+        self._command_overrides = dict()
 
         if self.preserve_roman:
-            self.commands.update({ x: x for x in ascii_letters })
+            self._command_overrides.update({ x: x for x in ascii_letters })
 
         if self.preamble:
             try:
                 with open(self.preamble, 'r') as f:
                     p = json.load(f)
-                    self.commands.update(p)
+                    self._command_overrides.update(p)
             except:
-                print('Invalid preamble file', file=sys.stderr)
+                print('Invalid preamble file', file=stderr)
+
+        super().__init__()
 
 
     def start(self, ch: List[Any]) -> str:
@@ -173,6 +176,11 @@ class ToUnicode(Transformer):  # type:ignore
         visitor(r, [], items)
         return "".join(self._handle_cmds(x[:-1], x[-1]) for x in r)
 
+    def _get_command_value(self, cmd, default = None):
+        if cmd in self._command_overrides:
+            return self._command_overrides.get(cmd, default)
+        else:
+            return COMMANDS.get(cmd, default)
 
     def _handle_cmds(self, cmds: List[str], x: str) -> str:
         # - x can be character or command, like \alpha
@@ -187,20 +195,22 @@ class ToUnicode(Transformer):  # type:ignore
             innermost = True
             for cmd in reversed(cmds):
                 latex = f"{cmd}{{{x}}}"
-                if latex in self.commands:
-                    x = self.commands[latex]
+                latex_val = self._get_command_value(latex)
+                if latex_val:
+                    x = latex_val
                 elif cmd in (r"\text", r"\mathrm"):
                     pass
                 else:
+                    cmd_val = self._get_command_value(cmd)
                     if innermost:
-                        x = self.commands.get(x, x)
-                    if cmd in self.commands:
+                        x = self._get_command_value(x, x)
+                    if cmd_val:
                         # must be some unicode modifier, e.g. \dot, \vec
                         assert cmd in HAS_ARG  # nosec
-                        x += self.commands[cmd]
+                        x += cmd_val
                     elif cmd not in IGNORE_AS_FALLBACK:
                         x = latex
                 innermost = False
         else:
-            x = self.commands.get(x, x)
+            x = self._get_command_value(x, x)
         return x
