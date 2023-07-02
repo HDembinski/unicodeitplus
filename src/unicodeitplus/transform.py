@@ -151,36 +151,36 @@ class ToUnicode(Transformer):  # type:ignore
 
         r: List[List[str]] = []
         visitor(r, [], items)
-        return "".join(_handle_cmds(x[:-1], x[-1]) for x in r)
+        return "".join(self._handle_cmds(x[:-1], x[-1]) for x in r)
 
 
-def _handle_cmds(cmds: List[str], x: str) -> str:
-    # - x can be character or command, like \alpha
-    # - cmds contains commands to apply, may be empty
-    # - to transform ^{\alpha} or \text{x} correctly,
-    #   we first try to convert innermost command and x
-    #   as unit; if this fails we treat commands sequentially
-    # - other commands in cmds must be modifiers like \dot or
-    #   \vec that are converted into diacritical characters
-    # - if we cannot convert, we return unconverted LaTeX
-    if cmds:
-        innermost = True
-        for cmd in reversed(cmds):
-            latex = f"{cmd}{{{x}}}"
-            if latex in COMMANDS:
-                x = COMMANDS[latex]
-            elif cmd in (r"\text", r"\mathrm"):
-                pass
-            else:
-                if innermost:
-                    x = COMMANDS.get(x, x)
-                if cmd in COMMANDS:
-                    # must be some unicode modifier, e.g. \dot, \vec
-                    assert cmd in HAS_ARG  # nosec
-                    x += COMMANDS[cmd]
-                elif cmd not in IGNORE_AS_FALLBACK:
-                    x = latex
-            innermost = False
-    else:
-        x = COMMANDS.get(x, x)
-    return x
+    def _handle_cmds(self, cmds: List[str], x: str) -> str:
+        # - x can be character or command, like \alpha
+        # - cmds contains commands to apply, may be empty
+        # - to transform ^{\alpha} or \text{x} correctly,
+        #   we first try to convert innermost command and x
+        #   as unit; if this fails we treat commands sequentially
+        # - other commands in cmds must be modifiers like \dot or
+        #   \vec that are converted into diacritical characters
+        # - if we cannot convert, we return unconverted LaTeX
+        if cmds:
+            innermost = True
+            for cmd in reversed(cmds):
+                latex = f"{cmd}{{{x}}}"
+                if latex in COMMANDS:
+                    x = COMMANDS[latex]
+                elif cmd in (r"\text", r"\mathrm"):
+                    pass
+                else:
+                    if innermost:
+                        x = COMMANDS.get(x, x)
+                    if cmd in COMMANDS:
+                        # must be some unicode modifier, e.g. \dot, \vec
+                        assert cmd in HAS_ARG  # nosec
+                        x += COMMANDS[cmd]
+                    elif cmd not in IGNORE_AS_FALLBACK:
+                        x = latex
+                innermost = False
+        else:
+            x = COMMANDS.get(x, x)
+        return x
