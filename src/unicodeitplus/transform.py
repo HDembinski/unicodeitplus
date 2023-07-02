@@ -3,6 +3,7 @@ from . import _make_data  # noqa, imported for side-effects
 from .data import COMMANDS, HAS_ARG
 from lark import Transformer, Token
 from typing import List, Any
+from string import ascii_letters
 
 
 IGNORE_AS_FALLBACK = {
@@ -49,6 +50,13 @@ class ToUnicode(Transformer):  # type:ignore
 
     def __init__(self, options = None):
         options = options if options else dict()
+        self.preserve_roman = options.get("preserve_roman", False)
+        self.preserve_math_whitespace = options.get("preserve_math_whitespace", False)
+        
+        self.commands = COMMANDS
+
+        if self.preserve_roman:
+            self.commands.update({ x: x for x in ascii_letters })
 
     def start(self, ch: List[Any]) -> str:
         """
@@ -125,7 +133,10 @@ class ToUnicode(Transformer):  # type:ignore
         unicode. See comments in that function for details.
         """
 
-        items = [x for x in items if isinstance(x, list) or (isinstance(x, str) and not x.isspace())]
+        is_space = lambda x: isinstance(x, str) and x.isspace()
+
+        if not self.preserve_math_whitespace:
+            items = [x for x in items if not is_space(x)]
         def visitor(
             r: List[List[str]],
             stack: List[str],
@@ -143,11 +154,11 @@ class ToUnicode(Transformer):  # type:ignore
                     if isinstance(x, list):
                         visitor(r, stack, x)
                     elif isinstance(x, str):
-                        if not x.isspace() or (stack and stack[-1] == r"\text"):
-                            r.append(stack.copy() + [x])
+                        r.append(stack.copy() + [x])
                     else:
                         assert False  # should never happen
-                    stack[:] = initial_stack
+                    if not is_space(x):
+                        stack[:] = initial_stack
 
         r: List[List[str]] = []
         visitor(r, [], items)
@@ -167,20 +178,20 @@ class ToUnicode(Transformer):  # type:ignore
             innermost = True
             for cmd in reversed(cmds):
                 latex = f"{cmd}{{{x}}}"
-                if latex in COMMANDS:
-                    x = COMMANDS[latex]
+                if latex in self.commands:
+                    x = self.commands[latex]
                 elif cmd in (r"\text", r"\mathrm"):
                     pass
                 else:
                     if innermost:
-                        x = COMMANDS.get(x, x)
-                    if cmd in COMMANDS:
+                        x = self.commands.get(x, x)
+                    if cmd in self.commands:
                         # must be some unicode modifier, e.g. \dot, \vec
                         assert cmd in HAS_ARG  # nosec
-                        x += COMMANDS[cmd]
+                        x += self.commands[cmd]
                     elif cmd not in IGNORE_AS_FALLBACK:
                         x = latex
                 innermost = False
         else:
-            x = COMMANDS.get(x, x)
+            x = self.commands.get(x, x)
         return x
