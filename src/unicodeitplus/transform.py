@@ -4,6 +4,8 @@ from .data import COMMANDS, HAS_ARG
 from lark import Transformer, Token
 from typing import List, Any
 from string import ascii_letters
+import json
+import sys
 
 
 IGNORE_AS_FALLBACK = {
@@ -52,11 +54,21 @@ class ToUnicode(Transformer):  # type:ignore
         options = options if options else dict()
         self.preserve_roman = options.get("preserve_roman", False)
         self.preserve_math_whitespace = options.get("preserve_math_whitespace", False)
+        self.preamble = options.get("preamble", None)
         
         self.commands = COMMANDS
 
         if self.preserve_roman:
             self.commands.update({ x: x for x in ascii_letters })
+
+        if self.preamble:
+            try:
+                with open(self.preamble, 'r') as f:
+                    p = json.load(f)
+                    self.commands.update(p)
+            except:
+                print('Invalid preamble file', file=sys.stderr)
+
 
     def start(self, ch: List[Any]) -> str:
         """

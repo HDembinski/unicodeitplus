@@ -9,6 +9,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("-r", "--preserve-roman", action="store_true", help="Do not italicize roman letters (A-Z a-z) in math")
     parser.add_argument("-w", "--preserve-math-whitespace", action="store_true", help="Preserve whitespace between math characters")
+    parser.add_argument("-p", "--preamble", action="store", help="Override data file from a JSON file with custom commands")
     parser.add_argument("ARG", nargs="+", help="some LaTeX code")
     args = parser.parse_args()
     options_dict = vars(args)
