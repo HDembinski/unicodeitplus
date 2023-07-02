@@ -122,6 +122,7 @@ class ToUnicode(Transformer):  # type:ignore
         unicode. See comments in that function for details.
         """
 
+        items = [x for x in items if isinstance(x, list) or (isinstance(x, str) and not x.isspace())]
         def visitor(
             r: List[List[str]],
             stack: List[str],

@@ -22,7 +22,7 @@ group: "{" item* "}"
 math: "$" item* "$"
 SUBSCRIPT: "_"
 SUPERSCRIPT: "^"
-COMMAND: (("\\" WORD WS*) | SUBSCRIPT | SUPERSCRIPT)
+COMMAND: (("\\" WORD) | SUBSCRIPT | SUPERSCRIPT)
 WS_EXT: WS | "~" | "\," | "\;" | "\:" | "\>"
 
 %import common.WS
