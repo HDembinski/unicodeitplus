@@ -3,6 +3,9 @@ from . import _make_data  # noqa, imported for side-effects
 from .data import COMMANDS, HAS_ARG
 from lark import Transformer, Token
 from typing import List, Any
+from string import ascii_letters
+import json
+from sys import stderr
 
 
 IGNORE_AS_FALLBACK = {
@@ -46,6 +49,29 @@ WHITESPACE = {
 
 class ToUnicode(Transformer):  # type:ignore
     """Convert Tree to Unicode."""
+
+    def __init__(self, options = None):
+        options = options if options else dict()
+        self.preserve_roman = options.get("preserve_roman", False)
+        self.preserve_math_whitespace = options.get("preserve_math_whitespace", False)
+        self.preamble = options.get("preamble", None)
+
+        # Don't copy COMMANDS just to update it, just keep track of overrides
+        self._command_overrides = dict()
+
+        if self.preserve_roman:
+            self._command_overrides.update({ x: x for x in ascii_letters })
+
+        if self.preamble:
+            try:
+                with open(self.preamble, 'r') as f:
+                    p = json.load(f)
+                    self._command_overrides.update(p)
+            except:
+                print('Invalid preamble file', file=stderr)
+
+        super().__init__()
+
 
     def start(self, ch: List[Any]) -> str:
         """
@@ -122,6 +148,8 @@ class ToUnicode(Transformer):  # type:ignore
         unicode. See comments in that function for details.
         """
 
+        is_space = lambda x: isinstance(x, str) and x.isspace()
+
         def visitor(
             r: List[List[str]],
             stack: List[str],
@@ -138,45 +166,51 @@ class ToUnicode(Transformer):  # type:ignore
                 else:
                     if isinstance(x, list):
                         visitor(r, stack, x)
-                    elif isinstance(x, str):
-                        if not x.isspace() or (stack and stack[-1] == r"\text"):
-                            r.append(stack.copy() + [x])
-                    else:
-                        assert False  # should never happen
-                    stack[:] = initial_stack
+                    elif not is_space(x) or self.preserve_math_whitespace:
+                        r.append(stack.copy() + [x])
+                    
+                    if not is_space(x):
+                        stack[:] = initial_stack
 
         r: List[List[str]] = []
         visitor(r, [], items)
-        return "".join(_handle_cmds(x[:-1], x[-1]) for x in r)
+        return "".join(self._handle_cmds(x[:-1], x[-1]) for x in r)
 
+    def _get_command_value(self, cmd, default = None):
+        if cmd in self._command_overrides:
+            return self._command_overrides.get(cmd, default)
+        else:
+            return COMMANDS.get(cmd, default)
 
-def _handle_cmds(cmds: List[str], x: str) -> str:
-    # - x can be character or command, like \alpha
-    # - cmds contains commands to apply, may be empty
-    # - to transform ^{\alpha} or \text{x} correctly,
-    #   we first try to convert innermost command and x
-    #   as unit; if this fails we treat commands sequentially
-    # - other commands in cmds must be modifiers like \dot or
-    #   \vec that are converted into diacritical characters
-    # - if we cannot convert, we return unconverted LaTeX
-    if cmds:
-        innermost = True
-        for cmd in reversed(cmds):
-            latex = f"{cmd}{{{x}}}"
-            if latex in COMMANDS:
-                x = COMMANDS[latex]
-            elif cmd in (r"\text", r"\mathrm"):
-                pass
-            else:
-                if innermost:
-                    x = COMMANDS.get(x, x)
-                if cmd in COMMANDS:
-                    # must be some unicode modifier, e.g. \dot, \vec
-                    assert cmd in HAS_ARG  # nosec
-                    x += COMMANDS[cmd]
-                elif cmd not in IGNORE_AS_FALLBACK:
-                    x = latex
-            innermost = False
-    else:
-        x = COMMANDS.get(x, x)
-    return x
+    def _handle_cmds(self, cmds: List[str], x: str) -> str:
+        # - x can be character or command, like \alpha
+        # - cmds contains commands to apply, may be empty
+        # - to transform ^{\alpha} or \text{x} correctly,
+        #   we first try to convert innermost command and x
+        #   as unit; if this fails we treat commands sequentially
+        # - other commands in cmds must be modifiers like \dot or
+        #   \vec that are converted into diacritical characters
+        # - if we cannot convert, we return unconverted LaTeX
+        if cmds:
+            innermost = True
+            for cmd in reversed(cmds):
+                latex = f"{cmd}{{{x}}}"
+                latex_val = self._get_command_value(latex)
+                if latex_val:
+                    x = latex_val
+                elif cmd in (r"\text", r"\mathrm"):
+                    pass
+                else:
+                    cmd_val = self._get_command_value(cmd)
+                    if innermost:
+                        x = self._get_command_value(x, x)
+                    if cmd_val:
+                        # must be some unicode modifier, e.g. \dot, \vec
+                        assert cmd in HAS_ARG  # nosec
+                        x += cmd_val
+                    elif cmd not in IGNORE_AS_FALLBACK:
+                        x = latex
+                innermost = False
+        else:
+            x = self._get_command_value(x, x)
+        return x

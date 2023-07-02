@@ -1,5 +1,9 @@
 import pytest
-from unicodeitplus import parse, replace
+from unicodeitplus import UnicodeItPlus
+
+parser = UnicodeItPlus()
+parser_w = UnicodeItPlus({ 'preserve_math_whitespace': True })
+parser_r = UnicodeItPlus({ 'preserve_roman': True })
 
 REPLACE_TEST_CASES = {
     r"\infty": "∞",
@@ -37,7 +41,7 @@ REPLACE_TEST_CASES = {
 @pytest.mark.parametrize("latex", REPLACE_TEST_CASES)
 def test_replace(latex):
     expected = REPLACE_TEST_CASES[latex]
-    got = replace(latex)
+    got = parser.replace(latex)
     assert expected == got
 
 
@@ -64,5 +68,26 @@ PARSE_TEST_CASES = {
 @pytest.mark.parametrize("latex", PARSE_TEST_CASES)
 def test_parse(latex):
     expected = PARSE_TEST_CASES[latex]
-    got = parse(latex)
+    got = parser.parse(latex)
     assert expected == got
+
+OPTION_TEST_CASES = {
+    "preserve_whitespace": {
+        r"$\sqrt{a} + b^2 \in \mathcal{S} \cdot \mathbb{R}$": "√𝑎̅ + 𝑏² ∈ 𝒮 ⋅ ℝ",
+        r"$x^1_1 \cdot   y = \int_a^b   f(x) dx$ foo bar": "𝑥¹₁ ⋅ 𝑦 = ∫ₐᵇ 𝑓(𝑥) 𝑑𝑥 foo bar",
+    },
+    "preserve_roman": {
+        r"$a \cdot \mathbb{R}$": "a⋅ℝ",
+        r"foo $a \mathbf{a} b \mathbf{b} A Z$ bar": "foo a𝐚b𝐛AZ bar",
+    },
+}
+
+def test_options():
+    for latex in OPTION_TEST_CASES["preserve_whitespace"]:
+        expected = OPTION_TEST_CASES["preserve_whitespace"][latex]
+        got = parser_w.parse(latex)
+        assert expected == got
+    for latex in OPTION_TEST_CASES["preserve_roman"]:
+        expected = OPTION_TEST_CASES["preserve_roman"][latex]
+        got = parser_r.parse(latex)
+        assert expected == got
