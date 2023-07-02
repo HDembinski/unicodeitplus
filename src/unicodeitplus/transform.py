@@ -47,6 +47,9 @@ WHITESPACE = {
 class ToUnicode(Transformer):  # type:ignore
     """Convert Tree to Unicode."""
 
+    def __init__(self, options = None):
+        options = options if options else dict()
+
     def start(self, ch: List[Any]) -> str:
         """
         Return final unicode.

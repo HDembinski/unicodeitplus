@@ -29,4 +29,5 @@ WS_EXT: WS | "~" | "\," | "\;" | "\:" | "\>"
 %import common.WORD
 """
 
-parser = Lark(grammar, parser="lalr", transformer=ToUnicode())
+def make_parser(transformer):
+    return Lark(grammar, parser="lalr", transformer=transformer)

@@ -6,9 +6,10 @@ try:
 except Exception:
     pass
 
-from .parser import parser
+from .parser import make_parser
+from .transform import ToUnicode
 
-__all__ = ["replace", "parse"]
+__all__ = ["UnicodeItPlus"]
 
 
 def parse(s: str) -> str:
@@ -19,3 +20,16 @@ def parse(s: str) -> str:
 def replace(s: str) -> str:
     """Replace simple LaTeX code by unicode approximation."""
     return parse(f"${s}$")
+
+class UnicodeItPlus():
+    def __init__(self, options = None):
+        transformer = ToUnicode(options)
+        self.parser = make_parser(transformer)
+    
+    def parse(self, s: str) -> str:
+        """Parse simple LaTeX code and replace it by an unicode approximation."""
+        return self.parser.parse(s)
+
+    def replace(self, s: str) -> str:
+        """Replace simple LaTeX code by unicode approximation."""
+        return self.parser.parse(f"${s}$")

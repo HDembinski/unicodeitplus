@@ -1,5 +1,7 @@
 import pytest
-from unicodeitplus import parse, replace
+from unicodeitplus import UnicodeItPlus
+
+parser = UnicodeItPlus()
 
 REPLACE_TEST_CASES = {
     r"\infty": "∞",
@@ -37,7 +39,7 @@ REPLACE_TEST_CASES = {
 @pytest.mark.parametrize("latex", REPLACE_TEST_CASES)
 def test_replace(latex):
     expected = REPLACE_TEST_CASES[latex]
-    got = replace(latex)
+    got = parser.replace(latex)
     assert expected == got
 
 
@@ -64,5 +66,5 @@ PARSE_TEST_CASES = {
 @pytest.mark.parametrize("latex", PARSE_TEST_CASES)
 def test_parse(latex):
     expected = PARSE_TEST_CASES[latex]
-    got = parse(latex)
+    got = parser.parse(latex)
     assert expected == got
