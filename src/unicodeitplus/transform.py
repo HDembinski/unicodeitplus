@@ -147,8 +147,6 @@ class ToUnicode(Transformer):  # type:ignore
 
         is_space = lambda x: isinstance(x, str) and x.isspace()
 
-        if not self.preserve_math_whitespace:
-            items = [x for x in items if not is_space(x)]
         def visitor(
             r: List[List[str]],
             stack: List[str],
@@ -165,10 +163,9 @@ class ToUnicode(Transformer):  # type:ignore
                 else:
                     if isinstance(x, list):
                         visitor(r, stack, x)
-                    elif isinstance(x, str):
+                    elif not is_space(x) or self.preserve_math_whitespace:
                         r.append(stack.copy() + [x])
-                    else:
-                        assert False  # should never happen
+                    
                     if not is_space(x):
                         stack[:] = initial_stack
 
